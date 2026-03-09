@@ -1,10 +1,63 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard{% endblock %}
+{% block title %}Dashboard - Feedback AI{% endblock %}
 
 {% block content %}
-<section class="card">
-    <h1>Dashboard</h1>
-    <p>Cette page affichera les statistiques et les graphiques du projet.</p>
-</section>
+<header style="margin-bottom: 3rem;">
+    <h1>Tableau de Bord Analytique</h1>
+    <p>Consultez les informations extraites de vos feedbacks clients.</p>
+</header>
+
+<div
+    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 3rem;">
+    <div class="card" style="padding: 1.5rem; display: flex; flex-direction: column; align-items: center;">
+        <span
+            style="color: var(--text-muted); font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Total
+            Feedbacks</span>
+        <span style="font-size: 2.5rem; font-weight: 800; color: var(--primary); margin-top: 0.5rem;">0</span>
+    </div>
+    <div class="card" style="padding: 1.5rem; display: flex; flex-direction: column; align-items: center;">
+        <span
+            style="color: var(--text-muted); font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Satisfaction
+            Moyenne</span>
+        <span style="font-size: 2.5rem; font-weight: 800; color: var(--success); margin-top: 0.5rem;">-- %</span>
+    </div>
+    <div class="card" style="padding: 1.5rem; display: flex; flex-direction: column; align-items: center;">
+        <span
+            style="color: var(--text-muted); font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Thèmes
+            Identifiés</span>
+        <span style="font-size: 2.5rem; font-weight: 800; color: #f59e0b; margin-top: 0.5rem;">0</span>
+    </div>
+</div>
+
+<div class="card" style="padding: 0; overflow: hidden;">
+    <div style="padding: 1.5rem 2.5rem; border-bottom: 1px solid var(--border); background-color: #f8fafc;">
+        <h3 style="margin: 0; font-size: 1.125rem;">Derniers Feedbacks Analysés</h3>
+    </div>
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead>
+                <tr style="background-color: #f1f5f9;">
+                    <th
+                        style="padding: 1rem 2.5rem; font-size: 0.75rem; font-weight: 700; color: var(--secondary); text-transform: uppercase; letter-spacing: 0.05em;">
+                        Date</th>
+                    <th
+                        style="padding: 1rem 2.5rem; font-size: 0.75rem; font-weight: 700; color: var(--secondary); text-transform: uppercase; letter-spacing: 0.05em;">
+                        Feedback</th>
+                    <th
+                        style="padding: 1rem 2.5rem; font-size: 0.75rem; font-weight: 700; color: var(--secondary); text-transform: uppercase; letter-spacing: 0.05em;">
+                        Sentiment</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="border-bottom: 1px solid var(--border);">
+                    <td colspan="3"
+                        style="padding: 3rem; text-align: center; color: var(--text-muted); font-style: italic;">
+                        Aucune donnée disponible. Veuillez importer un fichier CSV.
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
 {% endblock %}

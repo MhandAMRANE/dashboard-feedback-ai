@@ -1,10 +1,27 @@
 {% extends "base.html" %}
 
-{% block title %}Upload{% endblock %}
+{% block title %}Upload - Feedback AI{% endblock %}
 
 {% block content %}
-<section class="card">
-    <h1>Upload CSV</h1>
-    <p>Cette page servira à importer un fichier CSV de feedbacks clients.</p>
+<section class="card" style="max-width: 600px; margin: 0 auto;">
+    <h1 class="text-center">Importez vos données</h1>
+    <p class="text-center">Sélectionnez votre fichier CSV pour lancer l'analyse intelligente des feedbacks.</p>
+
+    <div style="margin-top: 2.5rem; border: 2px dashed var(--border); border-radius: var(--radius-md); padding: 3rem; text-align: center; cursor: pointer; transition: border-color 0.2s;"
+        onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--border)'">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            style="color: var(--secondary); margin-bottom: 1rem;">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="17 8 12 3 7 8" />
+            <line x1="12" y1="3" x2="12" y2="15" />
+        </svg>
+        <p style="font-size: 1rem; font-weight: 500; margin: 0;">Cliquez pour choisir un fichier ou déposez-le ici</p>
+        <p style="font-size: 0.75rem; margin-top: 0.5rem;">Format accepté : .csv uniquement</p>
+    </div>
+
+    <div class="text-center">
+        <button class="btn" style="width: 100%;">Lancer l'analyse</button>
+    </div>
 </section>
 {% endblock %}

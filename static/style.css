@@ -1,45 +1,142 @@
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #f4f7fb;
-    color: #1f2937;
+:root {
+    /* Color Palette - Modern Slate & Indigo */
+    --primary: #4f46e5;
+    --primary-hover: #4338ca;
+    --secondary: #64748b;
+    --bg-main: #f8fafc;
+    --bg-card: #ffffff;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+    --success: #10b981;
+    --danger: #ef4444;
+
+    /* Spacing & Borders */
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
 }
 
+body {
+    margin: 0;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Navigation System */
 .navbar {
-    background: #111827;
-    color: white;
-    padding: 16px 32px;
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--border);
+    padding: 0.75rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+
+.navbar .container {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
+.nav-brand {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--primary);
+    letter-spacing: -0.025em;
+}
+
+.nav-links {
+    display: flex;
+    gap: 1.5rem;
+}
+
 .nav-links a {
-    color: white;
+    color: var(--secondary);
     text-decoration: none;
-    margin-left: 16px;
-    font-weight: bold;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius-sm);
 }
 
+.nav-links a:hover {
+    color: var(--primary);
+    background-color: #f1f5f9;
+}
+
+/* Base Layout */
 .container {
-    max-width: 1000px;
-    margin: 40px auto;
-    padding: 0 20px;
+    max-width: 1024px;
+    margin: 3rem auto;
+    padding: 0 1.5rem;
 }
 
+/* Professional Cards */
 .card {
-    background: white;
-    padding: 24px;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    background: var(--bg-card);
+    padding: 2.5rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-md);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+.card:hover {
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+}
+
+/* Typography Enhancements */
+h1 {
+    font-size: 2.25rem;
+    font-weight: 800;
+    letter-spacing: -0.05em;
+    margin-bottom: 1rem;
+    color: #0f172a;
+}
+
+p {
+    color: var(--text-muted);
+    font-size: 1.125rem;
+}
+
+/* Better Buttons */
 .btn {
-    display: inline-block;
-    margin-top: 16px;
-    padding: 10px 18px;
-    background: #2563eb;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1.5rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--primary);
     color: white;
     text-decoration: none;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid transparent;
+}
+
+.btn:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+/* Utilities */
+.text-center {
+    text-align: center;
+}
+
+.mt-8 {
+    margin-top: 2rem;
 }
