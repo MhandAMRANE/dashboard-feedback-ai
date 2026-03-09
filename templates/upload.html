@@ -1,27 +1,78 @@
 {% extends "base.html" %}
 
-{% block title %}Upload - Feedback AI{% endblock %}
+{% block title %}Importer - Feedback AI{% endblock %}
 
 {% block content %}
-<section class="card" style="max-width: 600px; margin: 0 auto;">
-    <h1 class="text-center">Importez vos données</h1>
-    <p class="text-center">Sélectionnez votre fichier CSV pour lancer l'analyse intelligente des feedbacks.</p>
+<section class="card">
+    <header style="margin-bottom: 2rem; text-align: center;">
+        <h1>Importer un fichier CSV</h1>
+        <p>Chargez un fichier contenant vos feedbacks clients pour lancer l'analyse.</p>
+    </header>
 
-    <div style="margin-top: 2.5rem; border: 2px dashed var(--border); border-radius: var(--radius-md); padding: 3rem; text-align: center; cursor: pointer; transition: border-color 0.2s;"
-        onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--border)'">
-        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-            style="color: var(--secondary); margin-bottom: 1rem;">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-            <polyline points="17 8 12 3 7 8" />
-            <line x1="12" y1="3" x2="12" y2="15" />
-        </svg>
-        <p style="font-size: 1rem; font-weight: 500; margin: 0;">Cliquez pour choisir un fichier ou déposez-le ici</p>
-        <p style="font-size: 0.75rem; margin-top: 0.5rem;">Format accepté : .csv uniquement</p>
+    <form method="POST" enctype="multipart/form-data" class="upload-form">
+        <input type="file" name="file" accept=".csv" required>
+        <button type="submit" class="btn">Analyser les données</button>
+    </form>
+
+    {% if error %}
+    <div class="alert error">
+        <strong>Attention :</strong> {{ error }}
+    </div>
+    {% endif %}
+
+    {% if success %}
+    <div class="alert success">
+        <strong>Succès :</strong> {{ success }}
+    </div>
+    {% endif %}
+
+    <div
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
+        {% if file_info %}
+        <div class="info-box">
+            <h3>Informations du fichier</h3>
+            <p><strong>Nom :</strong> {{ file_info.filename }}</p>
+            <p><strong>Lignes :</strong> {{ file_info.rows }}</p>
+            <p><strong>Colonnes :</strong> {{ file_info.columns_count }}</p>
+        </div>
+        {% endif %}
+
+        {% if columns %}
+        <div class="info-box">
+            <h3>Colonnes détectées</h3>
+            <ul>
+                {% for col in columns %}
+                <li>{{ col }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
     </div>
 
-    <div class="text-center">
-        <button class="btn" style="width: 100%;">Lancer l'analyse</button>
+    {% if preview_data %}
+    <div class="table-container">
+        <div style="padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); background-color: #f8fafc;">
+            <h3 style="margin: 0; font-size: 1rem;">Aperçu des 5 premières lignes</h3>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    {% for key in preview_data[0].keys() %}
+                    <th>{{ key }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in preview_data %}
+                <tr>
+                    {% for value in row.values() %}
+                    <td>{{ value }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
+    {% endif %}
 </section>
 {% endblock %}
