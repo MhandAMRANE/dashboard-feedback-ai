@@ -5,20 +5,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Dashboard Feedback AI{% endblock %}</title>
-    <!-- Modern Font: Inter -->
+    <!-- Modern Typography: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    {% block head %}{% endblock %}
 </head>
 
 <body>
     <nav class="navbar">
         <div class="container">
-            <div class="nav-brand">Dashboard Feedback AI</div>
+            <a href="{{ url_for('home') }}" class="nav-brand">Feedback AI</a>
             <div class="nav-links">
                 <a href="{{ url_for('home') }}">Accueil</a>
-                <a href="{{ url_for('upload_page') }}">Upload</a>
+                <a href="{{ url_for('upload_page') }}">Importer</a>
                 <a href="{{ url_for('dashboard') }}">Dashboard</a>
             </div>
         </div>

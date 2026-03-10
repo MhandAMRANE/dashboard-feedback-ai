@@ -3,6 +3,18 @@ import pandas as pd
 from flask import Flask, render_template, request
 from werkzeug.utils import secure_filename
 
+from src.storage import (
+    init_db,
+    insert_feedback,
+    count_feedbacks,
+    get_all_feedbacks,
+    get_unanalyzed_feedbacks,
+    update_feedback_analysis,
+)
+from src.utils import clean_text, generate_text_hash, normalize_date
+from src.llm import analyze_feedback_with_llm
+from src.analytics import compute_sentiment_stats, compute_theme_stats
+
 app = Flask(__name__)
 
 UPLOAD_FOLDER = "data"
@@ -10,14 +22,68 @@ ALLOWED_EXTENSIONS = {"csv"}
 
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
+init_db()
+
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
+def fetch_feedback_dicts():
+    rows = get_all_feedbacks()
+    return [
+        {
+            "id": row[0],
+            "feedback_date": row[1],
+            "text": row[2],
+            "text_hash": row[3],
+            "sentiment": row[4],
+            "themes": row[5],
+            "confidence": row[6],
+            "created_at": row[7],
+        }
+        for row in rows
+    ]
+
+
+def apply_filters(feedbacks, sentiment_filter=None, theme_filter=None, date_filter=None):
+    filtered = feedbacks
+
+    if sentiment_filter:
+        filtered = [
+            feedback for feedback in filtered
+            if feedback.get("sentiment") == sentiment_filter
+        ]
+
+    if theme_filter:
+        filtered = [
+            feedback for feedback in filtered
+            if feedback.get("themes") and theme_filter in [t.strip() for t in feedback["themes"].split(",")]
+        ]
+
+    if date_filter:
+        filtered = [
+            feedback for feedback in filtered
+            if feedback.get("feedback_date") == date_filter
+        ]
+
+    return filtered
+
+
+def get_available_themes(feedbacks):
+    theme_set = set()
+    for feedback in feedbacks:
+        themes = feedback.get("themes")
+        if themes:
+            for theme in themes.split(","):
+                theme_set.add(theme.strip())
+    return sorted(theme_set)
+
+
 @app.route("/")
 def home():
-    return render_template("index.html")
+    total_feedbacks = count_feedbacks()
+    return render_template("index.html", total_feedbacks=total_feedbacks)
 
 
 @app.route("/upload", methods=["GET", "POST"])
@@ -27,6 +93,7 @@ def upload_page():
     error = None
     success = None
     file_info = None
+    import_summary = None
 
     if request.method == "POST":
         if "file" not in request.files:
@@ -38,6 +105,7 @@ def upload_page():
                 columns=columns,
                 success=success,
                 file_info=file_info,
+                import_summary=import_summary,
             )
 
         file = request.files["file"]
@@ -51,6 +119,7 @@ def upload_page():
                 columns=columns,
                 success=success,
                 file_info=file_info,
+                import_summary=import_summary,
             )
 
         if file and allowed_file(file.filename):
@@ -75,6 +144,32 @@ def upload_page():
                         "columns_count": len(df.columns),
                     }
 
+                    if "text" not in df.columns:
+                        error = "Le CSV doit contenir une colonne 'text'."
+                    else:
+                        inserted_count = 0
+                        duplicate_count = 0
+
+                        for _, row in df.iterrows():
+                            text = clean_text(row.get("text"))
+                            if not text:
+                                continue
+
+                            feedback_date = normalize_date(row.get("date"))
+                            text_hash = generate_text_hash(text)
+
+                            inserted = insert_feedback(feedback_date, text, text_hash)
+                            if inserted:
+                                inserted_count += 1
+                            else:
+                                duplicate_count += 1
+
+                        import_summary = {
+                            "inserted": inserted_count,
+                            "duplicates": duplicate_count,
+                            "total_in_db": count_feedbacks(),
+                        }
+
             except Exception as e:
                 error = f"Erreur lors de la lecture du CSV : {str(e)}"
         else:
@@ -87,12 +182,79 @@ def upload_page():
         columns=columns,
         success=success,
         file_info=file_info,
+        import_summary=import_summary,
+    )
+
+
+@app.route("/analyze", methods=["POST"])
+def analyze_feedbacks():
+    unanalyzed_feedbacks = get_unanalyzed_feedbacks()
+    analyzed_count = 0
+    error_messages = []
+
+    for feedback_id, text in unanalyzed_feedbacks:
+        try:
+            result = analyze_feedback_with_llm(text)
+            update_feedback_analysis(
+                feedback_id=feedback_id,
+                sentiment=result["sentiment"],
+                themes=", ".join(result["themes"]),
+                confidence=result["confidence"],
+            )
+            analyzed_count += 1
+        except Exception as e:
+            error_messages.append(f"Feedback ID {feedback_id}: {str(e)}")
+
+    feedbacks = fetch_feedback_dicts()
+    sentiment_stats = compute_sentiment_stats(feedbacks)
+    theme_stats = compute_theme_stats(feedbacks)
+    available_themes = get_available_themes(feedbacks)
+
+    return render_template(
+        "dashboard.html",
+        feedbacks=feedbacks,
+        analyzed_count=analyzed_count,
+        error_messages=error_messages,
+        sentiment_stats=sentiment_stats,
+        theme_stats=theme_stats,
+        available_themes=available_themes,
+        current_sentiment="",
+        current_theme="",
+        current_date="",
     )
 
 
 @app.route("/dashboard")
 def dashboard():
-    return render_template("dashboard.html")
+    feedbacks = fetch_feedback_dicts()
+
+    sentiment_filter = request.args.get("sentiment", "").strip()
+    theme_filter = request.args.get("theme", "").strip()
+    date_filter = request.args.get("date", "").strip()
+
+    filtered_feedbacks = apply_filters(
+        feedbacks,
+        sentiment_filter=sentiment_filter if sentiment_filter else None,
+        theme_filter=theme_filter if theme_filter else None,
+        date_filter=date_filter if date_filter else None,
+    )
+
+    sentiment_stats = compute_sentiment_stats(filtered_feedbacks)
+    theme_stats = compute_theme_stats(filtered_feedbacks)
+    available_themes = get_available_themes(feedbacks)
+
+    return render_template(
+        "dashboard.html",
+        feedbacks=filtered_feedbacks,
+        analyzed_count=None,
+        error_messages=[],
+        sentiment_stats=sentiment_stats,
+        theme_stats=theme_stats,
+        available_themes=available_themes,
+        current_sentiment=sentiment_filter,
+        current_theme=theme_filter,
+        current_date=date_filter,
+    )
 
 
 if __name__ == "__main__":

@@ -1,57 +1,153 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard - Feedback AI{% endblock %}
+{% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<header style="margin-bottom: 3rem;">
-    <h1>Tableau de Bord Analytique</h1>
-    <p>Consultez les informations extraites de vos feedbacks clients.</p>
-</header>
+<section class="card">
+    <h1>Dashboard Analytique</h1>
+    <p>Consultez l'historique complet des feedbacks stockés en base et enrichis par l'IA.</p>
 
-<div
-    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 3rem;">
-    <div class="card" style="padding: 1.5rem; display: flex; flex-direction: column; align-items: center;">
-        <span
-            style="color: var(--text-muted); font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Total
-            Feedbacks</span>
-        <span style="font-size: 2.5rem; font-weight: 800; color: var(--primary); margin-top: 0.5rem;">0</span>
-    </div>
-    <div class="card" style="padding: 1.5rem; display: flex; flex-direction: column; align-items: center;">
-        <span
-            style="color: var(--text-muted); font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Satisfaction
-            Moyenne</span>
-        <span style="font-size: 2.5rem; font-weight: 800; color: var(--success); margin-top: 0.5rem;">-- %</span>
-    </div>
-    <div class="card" style="padding: 1.5rem; display: flex; flex-direction: column; align-items: center;">
-        <span
-            style="color: var(--text-muted); font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Thèmes
-            Identifiés</span>
-        <span style="font-size: 2.5rem; font-weight: 800; color: #f59e0b; margin-top: 0.5rem;">0</span>
-    </div>
-</div>
+    <form method="POST" action="{{ url_for('analyze_feedbacks') }}" style="margin-top: 20px;">
+        <button type="submit" class="btn">Lancer l'analyse IA</button>
+    </form>
 
-<div class="card" style="padding: 0; overflow: hidden;">
-    <div style="padding: 1.5rem 2.5rem; border-bottom: 1px solid var(--border); background-color: #f8fafc;">
-        <h3 style="margin: 0; font-size: 1.125rem;">Historique des analyses</h3>
+    {% if analyzed_count is not none %}
+    <div class="alert success">
+        {{ analyzed_count }} feedback(s) analysé(s) avec succès.
     </div>
-    <div class="table-container" style="border: none; margin-top: 0;">
+    {% endif %}
+
+    {% if error_messages %}
+    <div class="alert error">
+        <strong>Erreurs pendant l'analyse :</strong>
+        <ul>
+            {% for error in error_messages %}
+            <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</section>
+
+<section class="card" style="margin-top: 24px;">
+    <h2>Filtres</h2>
+    <form method="GET" action="{{ url_for('dashboard') }}" class="filters-form">
+        <div class="filter-group">
+            <label for="sentiment">Sentiment</label>
+            <select name="sentiment" id="sentiment">
+                <option value="">Tous</option>
+                <option value="positive" {% if current_sentiment=="positive" %}selected{% endif %}>Positif</option>
+                <option value="neutral" {% if current_sentiment=="neutral" %}selected{% endif %}>Neutre</option>
+                <option value="negative" {% if current_sentiment=="negative" %}selected{% endif %}>Négatif</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="theme">Thème</label>
+            <select name="theme" id="theme">
+                <option value="">Tous</option>
+                {% for theme in available_themes %}
+                <option value="{{ theme }}" {% if current_theme==theme %}selected{% endif %}>{{ theme }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="date">Date</label>
+            <input type="date" name="date" id="date" value="{{ current_date }}">
+        </div>
+
+        <div class="filter-actions">
+            <button type="submit" class="btn">Filtrer</button>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Réinitialiser</a>
+        </div>
+    </form>
+</section>
+
+<section class="stats-grid">
+    <div class="stat-card">
+        <h3>Total</h3>
+        <p>{{ sentiment_stats.total }}</p>
+    </div>
+    <div class="stat-card">
+        <h3>Positifs</h3>
+        <p>{{ sentiment_stats.positive }}</p>
+    </div>
+    <div class="stat-card">
+        <h3>Neutres</h3>
+        <p>{{ sentiment_stats.neutral }}</p>
+    </div>
+    <div class="stat-card">
+        <h3>Négatifs</h3>
+        <p>{{ sentiment_stats.negative }}</p>
+    </div>
+    <div class="stat-card">
+        <h3>Non analysés</h3>
+        <p>{{ sentiment_stats.not_analyzed }}</p>
+    </div>
+</section>
+
+<section class="card" style="margin-top: 24px;">
+    <h2>Top thèmes</h2>
+
+    {% if theme_stats %}
+    <div class="table-container">
         <table>
             <thead>
                 <tr>
-                    <th>Date</th>
-                    <th>Feedback</th>
-                    <th>Sentiment</th>
+                    <th>Thème</th>
+                    <th>Occurrences</th>
                 </tr>
             </thead>
             <tbody>
+                {% for theme, count in theme_stats %}
                 <tr>
-                    <td colspan="3"
-                        style="padding: 3rem; text-align: center; color: var(--text-muted); font-style: italic;">
-                        Aucune donnée d'analyse disponible.
-                    </td>
+                    <td>{{ theme }}</td>
+                    <td>{{ count }}</td>
                 </tr>
+                {% endfor %}
             </tbody>
         </table>
     </div>
-</div>
+    {% else %}
+    <p>Aucun thème disponible pour le moment.</p>
+    {% endif %}
+</section>
+
+<section class="card" style="margin-top: 24px;">
+    <h2>Historique des feedbacks</h2>
+
+    {% if feedbacks %}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Date</th>
+                    <th>Texte</th>
+                    <th>Sentiment</th>
+                    <th>Thèmes</th>
+                    <th>Confiance</th>
+                    <th>Créé le</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for feedback in feedbacks %}
+                <tr>
+                    <td>{{ feedback.id }}</td>
+                    <td>{{ feedback.feedback_date or "-" }}</td>
+                    <td>{{ feedback.text }}</td>
+                    <td>{{ feedback.sentiment or "-" }}</td>
+                    <td>{{ feedback.themes or "-" }}</td>
+                    <td>{{ feedback.confidence or "-" }}</td>
+                    <td>{{ feedback.created_at }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p>Aucun feedback ne correspond aux filtres sélectionnés.</p>
+    {% endif %}
+</section>
 {% endblock %}
