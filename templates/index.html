@@ -1,18 +1,74 @@
 {% extends "base.html" %}
 
-{% block title %}Accueil{% endblock %}
+{% block title %}Accueil - Feedback AI{% endblock %}
 
 {% block content %}
-<section class="card">
-    <h1>Bienvenue</h1>
-    <p>
-        Cette application permet d'importer des feedbacks clients,
-        de les analyser avec une IA, puis d'afficher un dashboard
-        contenant les sentiments, les thèmes et les statistiques principales.
+<section class="card text-center" style="padding: 5rem 2rem;">
+    <div style="margin-bottom: 2rem;">
+        <span
+            style="background-color: #e0e7ff; color: #4338ca; padding: 0.5rem 1rem; border-radius: 9999px; font-size: 0.8125rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Intelligence
+            Artificielle de Feedback</span>
+    </div>
+    <h1 style="font-size: 3.5rem; margin-bottom: 1.5rem; line-height: 1.1;">Transformez vos retours en <span
+            style="color: var(--primary);">décisions éclairées</span></h1>
+    <p style="max-width: 700px; margin: 0 auto 3rem auto; font-size: 1.25rem; color: var(--text-muted);">
+        Importez vos données clients, analysez les sentiments et identifiez les thèmes récurrents instantanément grâce à
+        notre technologie d'analyse avancée.
     </p>
 
-    <p><strong>Nombre total de feedbacks en base :</strong> {{ total_feedbacks }}</p>
+    <div style="display: flex; gap: 1rem; justify-content: center;">
+        <a class="btn" href="{{ url_for('upload_page') }}">Commencer maintenant</a>
+        <a class="btn" href="{{ url_for('dashboard') }}"
+            style="background: white; color: var(--text-main); border: 1px solid var(--border);">Explorer les
+            données</a>
+    </div>
 
-    <a class="btn" href="{{ url_for('upload_page') }}">Commencer</a>
+    <div class="stats-grid" style="max-width: 400px; margin: 4rem auto 0 auto;">
+        <div class="stat-card">
+            <h3>Feedbacks en base</h3>
+            <span class="value">{{ total_feedbacks }}</span>
+        </div>
+    </div>
 </section>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; margin-top: 3rem;">
+    <div class="card" style="padding: 2rem;">
+        <div
+            style="background: var(--info-bg); color: var(--info-text); width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+        </div>
+        <h3 style="font-size: 1.25rem; margin-bottom: 0.75rem;">Sentiment Scoring</h3>
+        <p style="font-size: 0.9375rem;">Classification automatique des retours clients en catégories Positives, Neutres
+            ou Négatives.</p>
+    </div>
+    <div class="card" style="padding: 2rem;">
+        <div
+            style="background: var(--success-bg); color: var(--success-text); width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+            </svg>
+        </div>
+        <h3 style="font-size: 1.25rem; margin-bottom: 0.75rem;">Extraction de Thèmes</h3>
+        <p style="font-size: 0.9375rem;">Extraction intelligente des sujets clés (Support, Qualité, Livraison) pour
+            chaque commentaire.</p>
+    </div>
+    <div class="card" style="padding: 2rem;">
+        <div
+            style="background: var(--warning-bg); color: var(--warning-text); width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <line x1="12" y1="8" x2="12" y2="16" />
+                <line x1="8" y1="12" x2="16" y2="12" />
+            </svg>
+        </div>
+        <h3 style="font-size: 1.25rem; margin-bottom: 0.75rem;">Insights SQLite</h3>
+        <p style="font-size: 0.9375rem;">Stockage persistant et rapide de toutes vos analyses pour un suivi historique
+            complet.</p>
+    </div>
+</div>
 {% endblock %}
