@@ -46,6 +46,40 @@ def fetch_feedback_dicts():
     ]
 
 
+def apply_filters(feedbacks, sentiment_filter=None, theme_filter=None, date_filter=None):
+    filtered = feedbacks
+
+    if sentiment_filter:
+        filtered = [
+            feedback for feedback in filtered
+            if feedback.get("sentiment") == sentiment_filter
+        ]
+
+    if theme_filter:
+        filtered = [
+            feedback for feedback in filtered
+            if feedback.get("themes") and theme_filter in [t.strip() for t in feedback["themes"].split(",")]
+        ]
+
+    if date_filter:
+        filtered = [
+            feedback for feedback in filtered
+            if feedback.get("feedback_date") == date_filter
+        ]
+
+    return filtered
+
+
+def get_available_themes(feedbacks):
+    theme_set = set()
+    for feedback in feedbacks:
+        themes = feedback.get("themes")
+        if themes:
+            for theme in themes.split(","):
+                theme_set.add(theme.strip())
+    return sorted(theme_set)
+
+
 @app.route("/")
 def home():
     total_feedbacks = count_feedbacks()
@@ -174,6 +208,7 @@ def analyze_feedbacks():
     feedbacks = fetch_feedback_dicts()
     sentiment_stats = compute_sentiment_stats(feedbacks)
     theme_stats = compute_theme_stats(feedbacks)
+    available_themes = get_available_themes(feedbacks)
 
     return render_template(
         "dashboard.html",
@@ -182,22 +217,43 @@ def analyze_feedbacks():
         error_messages=error_messages,
         sentiment_stats=sentiment_stats,
         theme_stats=theme_stats,
+        available_themes=available_themes,
+        current_sentiment="",
+        current_theme="",
+        current_date="",
     )
 
 
 @app.route("/dashboard")
 def dashboard():
     feedbacks = fetch_feedback_dicts()
-    sentiment_stats = compute_sentiment_stats(feedbacks)
-    theme_stats = compute_theme_stats(feedbacks)
+
+    sentiment_filter = request.args.get("sentiment", "").strip()
+    theme_filter = request.args.get("theme", "").strip()
+    date_filter = request.args.get("date", "").strip()
+
+    filtered_feedbacks = apply_filters(
+        feedbacks,
+        sentiment_filter=sentiment_filter if sentiment_filter else None,
+        theme_filter=theme_filter if theme_filter else None,
+        date_filter=date_filter if date_filter else None,
+    )
+
+    sentiment_stats = compute_sentiment_stats(filtered_feedbacks)
+    theme_stats = compute_theme_stats(filtered_feedbacks)
+    available_themes = get_available_themes(feedbacks)
 
     return render_template(
         "dashboard.html",
-        feedbacks=feedbacks,
+        feedbacks=filtered_feedbacks,
         analyzed_count=None,
         error_messages=[],
         sentiment_stats=sentiment_stats,
         theme_stats=theme_stats,
+        available_themes=available_themes,
+        current_sentiment=sentiment_filter,
+        current_theme=theme_filter,
+        current_date=date_filter,
     )
 
 
