@@ -12,21 +12,56 @@
     </form>
 
     {% if analyzed_count is not none %}
-        <div class="alert success">
-            {{ analyzed_count }} feedback(s) analysé(s) avec succès.
-        </div>
+    <div class="alert success">
+        {{ analyzed_count }} feedback(s) analysé(s) avec succès.
+    </div>
     {% endif %}
 
     {% if error_messages %}
-        <div class="alert error">
-            <strong>Erreurs pendant l'analyse :</strong>
-            <ul>
-                {% for error in error_messages %}
-                    <li>{{ error }}</li>
-                {% endfor %}
-            </ul>
-        </div>
+    <div class="alert error">
+        <strong>Erreurs pendant l'analyse :</strong>
+        <ul>
+            {% for error in error_messages %}
+            <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    </div>
     {% endif %}
+</section>
+
+<section class="card" style="margin-top: 24px;">
+    <h2>Filtres</h2>
+    <form method="GET" action="{{ url_for('dashboard') }}" class="filters-form">
+        <div class="filter-group">
+            <label for="sentiment">Sentiment</label>
+            <select name="sentiment" id="sentiment">
+                <option value="">Tous</option>
+                <option value="positive" {% if current_sentiment=="positive" %}selected{% endif %}>Positif</option>
+                <option value="neutral" {% if current_sentiment=="neutral" %}selected{% endif %}>Neutre</option>
+                <option value="negative" {% if current_sentiment=="negative" %}selected{% endif %}>Négatif</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="theme">Thème</label>
+            <select name="theme" id="theme">
+                <option value="">Tous</option>
+                {% for theme in available_themes %}
+                <option value="{{ theme }}" {% if current_theme==theme %}selected{% endif %}>{{ theme }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="date">Date</label>
+            <input type="date" name="date" id="date" value="{{ current_date }}">
+        </div>
+
+        <div class="filter-actions">
+            <button type="submit" class="btn">Filtrer</button>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Réinitialiser</a>
+        </div>
+    </form>
 </section>
 
 <section class="stats-grid">
@@ -56,26 +91,26 @@
     <h2>Top thèmes</h2>
 
     {% if theme_stats %}
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Thème</th>
-                        <th>Occurrences</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for theme, count in theme_stats %}
-                        <tr>
-                            <td>{{ theme }}</td>
-                            <td>{{ count }}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Thème</th>
+                    <th>Occurrences</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for theme, count in theme_stats %}
+                <tr>
+                    <td>{{ theme }}</td>
+                    <td>{{ count }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
     {% else %}
-        <p>Aucun thème disponible pour le moment.</p>
+    <p>Aucun thème disponible pour le moment.</p>
     {% endif %}
 </section>
 
@@ -83,36 +118,36 @@
     <h2>Historique des feedbacks</h2>
 
     {% if feedbacks %}
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Date</th>
-                        <th>Texte</th>
-                        <th>Sentiment</th>
-                        <th>Thèmes</th>
-                        <th>Confiance</th>
-                        <th>Créé le</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for feedback in feedbacks %}
-                        <tr>
-                            <td>{{ feedback.id }}</td>
-                            <td>{{ feedback.feedback_date or "-" }}</td>
-                            <td>{{ feedback.text }}</td>
-                            <td>{{ feedback.sentiment or "-" }}</td>
-                            <td>{{ feedback.themes or "-" }}</td>
-                            <td>{{ feedback.confidence or "-" }}</td>
-                            <td>{{ feedback.created_at }}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Date</th>
+                    <th>Texte</th>
+                    <th>Sentiment</th>
+                    <th>Thèmes</th>
+                    <th>Confiance</th>
+                    <th>Créé le</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for feedback in feedbacks %}
+                <tr>
+                    <td>{{ feedback.id }}</td>
+                    <td>{{ feedback.feedback_date or "-" }}</td>
+                    <td>{{ feedback.text }}</td>
+                    <td>{{ feedback.sentiment or "-" }}</td>
+                    <td>{{ feedback.themes or "-" }}</td>
+                    <td>{{ feedback.confidence or "-" }}</td>
+                    <td>{{ feedback.created_at }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
     {% else %}
-        <p>Aucun feedback enregistré pour le moment.</p>
+    <p>Aucun feedback ne correspond aux filtres sélectionnés.</p>
     {% endif %}
 </section>
 {% endblock %}
