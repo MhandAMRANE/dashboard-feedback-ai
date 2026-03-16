@@ -73,3 +73,33 @@ def count_feedbacks():
 
     conn.close()
     return count
+
+
+def get_unanalyzed_feedbacks():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT id, text
+        FROM feedbacks
+        WHERE sentiment IS NULL
+        ORDER BY id ASC
+    """)
+
+    rows = cursor.fetchall()
+    conn.close()
+    return rows
+
+
+def update_feedback_analysis(feedback_id, sentiment, themes, confidence):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        UPDATE feedbacks
+        SET sentiment = ?, themes = ?, confidence = ?
+        WHERE id = ?
+    """, (sentiment, themes, confidence, feedback_id))
+
+    conn.commit()
+    conn.close()

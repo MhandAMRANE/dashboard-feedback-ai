@@ -5,7 +5,28 @@
 {% block content %}
 <section class="card">
     <h1>Dashboard</h1>
-    <p>Liste des feedbacks stockés en base.</p>
+    <p>Liste des feedbacks stockés en base et enrichis par l'IA.</p>
+
+    <form method="POST" action="{{ url_for('analyze_feedbacks') }}">
+        <button type="submit" class="btn">Analyser les feedbacks non traités</button>
+    </form>
+
+    {% if analyzed_count is not none %}
+        <div class="alert success">
+            {{ analyzed_count }} feedback(s) analysé(s) avec succès.
+        </div>
+    {% endif %}
+
+    {% if error_messages %}
+        <div class="alert error">
+            <strong>Erreurs pendant l'analyse :</strong>
+            <ul>
+                {% for error in error_messages %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
 
     {% if feedbacks %}
         <div class="table-container">

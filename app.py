@@ -1,10 +1,18 @@
 import os
 import pandas as pd
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
 from werkzeug.utils import secure_filename
 
-from src.storage import init_db, insert_feedback, count_feedbacks, get_all_feedbacks
+from src.storage import (
+    init_db,
+    insert_feedback,
+    count_feedbacks,
+    get_all_feedbacks,
+    get_unanalyzed_feedbacks,
+    update_feedback_analysis,
+)
 from src.utils import clean_text, generate_text_hash, normalize_date
+from src.llm import analyze_feedback_with_llm
 
 app = Flask(__name__)
 
@@ -126,6 +134,48 @@ def upload_page():
     )
 
 
+@app.route("/analyze", methods=["POST"])
+def analyze_feedbacks():
+    unanalyzed_feedbacks = get_unanalyzed_feedbacks()
+    analyzed_count = 0
+    error_messages = []
+
+    for feedback_id, text in unanalyzed_feedbacks:
+        try:
+            result = analyze_feedback_with_llm(text)
+            update_feedback_analysis(
+                feedback_id=feedback_id,
+                sentiment=result["sentiment"],
+                themes=", ".join(result["themes"]),
+                confidence=result["confidence"],
+            )
+            analyzed_count += 1
+        except Exception as e:
+            error_messages.append(f"Feedback ID {feedback_id}: {str(e)}")
+
+    rows = get_all_feedbacks()
+    feedbacks = [
+        {
+            "id": row[0],
+            "feedback_date": row[1],
+            "text": row[2],
+            "text_hash": row[3],
+            "sentiment": row[4],
+            "themes": row[5],
+            "confidence": row[6],
+            "created_at": row[7],
+        }
+        for row in rows
+    ]
+
+    return render_template(
+        "dashboard.html",
+        feedbacks=feedbacks,
+        analyzed_count=analyzed_count,
+        error_messages=error_messages,
+    )
+
+
 @app.route("/dashboard")
 def dashboard():
     rows = get_all_feedbacks()
@@ -142,7 +192,12 @@ def dashboard():
         }
         for row in rows
     ]
-    return render_template("dashboard.html", feedbacks=feedbacks)
+    return render_template(
+        "dashboard.html",
+        feedbacks=feedbacks,
+        analyzed_count=None,
+        error_messages=[],
+    )
 
 
 if __name__ == "__main__":
