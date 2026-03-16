@@ -4,11 +4,11 @@
 
 {% block content %}
 <section class="card">
-    <h1>Dashboard</h1>
-    <p>Liste des feedbacks stockés en base et enrichis par l'IA.</p>
+    <h1>Dashboard Analytique</h1>
+    <p>Consultez l'historique complet des feedbacks stockés en base et enrichis par l'IA.</p>
 
-    <form method="POST" action="{{ url_for('analyze_feedbacks') }}">
-        <button type="submit" class="btn">Analyser les feedbacks non traités</button>
+    <form method="POST" action="{{ url_for('analyze_feedbacks') }}" style="margin-top: 20px;">
+        <button type="submit" class="btn">Lancer l'analyse IA</button>
     </form>
 
     {% if analyzed_count is not none %}
@@ -27,6 +27,60 @@
             </ul>
         </div>
     {% endif %}
+</section>
+
+<section class="stats-grid">
+    <div class="stat-card">
+        <h3>Total</h3>
+        <p>{{ sentiment_stats.total }}</p>
+    </div>
+    <div class="stat-card">
+        <h3>Positifs</h3>
+        <p>{{ sentiment_stats.positive }}</p>
+    </div>
+    <div class="stat-card">
+        <h3>Neutres</h3>
+        <p>{{ sentiment_stats.neutral }}</p>
+    </div>
+    <div class="stat-card">
+        <h3>Négatifs</h3>
+        <p>{{ sentiment_stats.negative }}</p>
+    </div>
+    <div class="stat-card">
+        <h3>Non analysés</h3>
+        <p>{{ sentiment_stats.not_analyzed }}</p>
+    </div>
+</section>
+
+<section class="card" style="margin-top: 24px;">
+    <h2>Top thèmes</h2>
+
+    {% if theme_stats %}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Thème</th>
+                        <th>Occurrences</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for theme, count in theme_stats %}
+                        <tr>
+                            <td>{{ theme }}</td>
+                            <td>{{ count }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p>Aucun thème disponible pour le moment.</p>
+    {% endif %}
+</section>
+
+<section class="card" style="margin-top: 24px;">
+    <h2>Historique des feedbacks</h2>
 
     {% if feedbacks %}
         <div class="table-container">

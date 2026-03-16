@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request
 from werkzeug.utils import secure_filename
 
 from src.storage import (
@@ -13,6 +13,7 @@ from src.storage import (
 )
 from src.utils import clean_text, generate_text_hash, normalize_date
 from src.llm import analyze_feedback_with_llm
+from src.analytics import compute_sentiment_stats, compute_theme_stats
 
 app = Flask(__name__)
 
@@ -26,6 +27,23 @@ init_db()
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+def fetch_feedback_dicts():
+    rows = get_all_feedbacks()
+    return [
+        {
+            "id": row[0],
+            "feedback_date": row[1],
+            "text": row[2],
+            "text_hash": row[3],
+            "sentiment": row[4],
+            "themes": row[5],
+            "confidence": row[6],
+            "created_at": row[7],
+        }
+        for row in rows
+    ]
 
 
 @app.route("/")
@@ -153,50 +171,33 @@ def analyze_feedbacks():
         except Exception as e:
             error_messages.append(f"Feedback ID {feedback_id}: {str(e)}")
 
-    rows = get_all_feedbacks()
-    feedbacks = [
-        {
-            "id": row[0],
-            "feedback_date": row[1],
-            "text": row[2],
-            "text_hash": row[3],
-            "sentiment": row[4],
-            "themes": row[5],
-            "confidence": row[6],
-            "created_at": row[7],
-        }
-        for row in rows
-    ]
+    feedbacks = fetch_feedback_dicts()
+    sentiment_stats = compute_sentiment_stats(feedbacks)
+    theme_stats = compute_theme_stats(feedbacks)
 
     return render_template(
         "dashboard.html",
         feedbacks=feedbacks,
         analyzed_count=analyzed_count,
         error_messages=error_messages,
+        sentiment_stats=sentiment_stats,
+        theme_stats=theme_stats,
     )
 
 
 @app.route("/dashboard")
 def dashboard():
-    rows = get_all_feedbacks()
-    feedbacks = [
-        {
-            "id": row[0],
-            "feedback_date": row[1],
-            "text": row[2],
-            "text_hash": row[3],
-            "sentiment": row[4],
-            "themes": row[5],
-            "confidence": row[6],
-            "created_at": row[7],
-        }
-        for row in rows
-    ]
+    feedbacks = fetch_feedback_dicts()
+    sentiment_stats = compute_sentiment_stats(feedbacks)
+    theme_stats = compute_theme_stats(feedbacks)
+
     return render_template(
         "dashboard.html",
         feedbacks=feedbacks,
         analyzed_count=None,
         error_messages=[],
+        sentiment_stats=sentiment_stats,
+        theme_stats=theme_stats,
     )
 
 
