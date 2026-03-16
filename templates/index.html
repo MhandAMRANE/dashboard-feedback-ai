@@ -1,36 +1,18 @@
 {% extends "base.html" %}
 
-{% block title %}Accueil - Feedback AI{% endblock %}
+{% block title %}Accueil{% endblock %}
 
 {% block content %}
-<section class="card text-center">
-    <div style="margin-bottom: 2rem;">
-        <span
-            style="background-color: #e0e7ff; color: #4338ca; padding: 0.5rem 1rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 600;">Propulsé
-            par l'IA</span>
-    </div>
-    <h1>Transformez vos Feedbacks en Insights Stratégiques</h1>
-    <p style="max-width: 600px; margin: 0 auto;">
-        Importez vos données clients, analysez les sentiments et identifiez les thèmes récurrents en quelques secondes
-        grâce à notre technologie d'analyse avancée.
+<section class="card">
+    <h1>Bienvenue</h1>
+    <p>
+        Cette application permet d'importer des feedbacks clients,
+        de les analyser avec une IA, puis d'afficher un dashboard
+        contenant les sentiments, les thèmes et les statistiques principales.
     </p>
-    <div style="margin-top: 2rem;">
-        <a class="btn" href="{{ url_for('upload_page') }}">Commencer maintenant</a>
-    </div>
-</section>
 
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 3rem;">
-    <div class="card" style="padding: 2rem;">
-        <h3 style="margin-top: 0;">Analyse Rapide</h3>
-        <p style="font-size: 0.875rem;">Traitez des centaines de commentaires en un clic.</p>
-    </div>
-    <div class="card" style="padding: 2rem;">
-        <h3 style="margin-top: 0;">Sentiment Scoring</h3>
-        <p style="font-size: 0.875rem;">Évaluez la satisfaction globale avec précision.</p>
-    </div>
-    <div class="card" style="padding: 2rem;">
-        <h3 style="margin-top: 0;">Extraction de Thèmes</h3>
-        <p style="font-size: 0.875rem;">Découvrez ce que vos clients disent vraiment.</p>
-    </div>
-</div>
+    <p><strong>Nombre total de feedbacks en base :</strong> {{ total_feedbacks }}</p>
+
+    <a class="btn" href="{{ url_for('upload_page') }}">Commencer</a>
+</section>
 {% endblock %}

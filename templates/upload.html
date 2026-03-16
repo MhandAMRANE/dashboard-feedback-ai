@@ -1,78 +1,78 @@
 {% extends "base.html" %}
 
-{% block title %}Importer - Feedback AI{% endblock %}
+{% block title %}Upload{% endblock %}
 
 {% block content %}
 <section class="card">
-    <header style="margin-bottom: 2rem; text-align: center;">
-        <h1>Importer un fichier CSV</h1>
-        <p>Chargez un fichier contenant vos feedbacks clients pour lancer l'analyse.</p>
-    </header>
+    <h1>Importer un fichier CSV</h1>
+    <p>
+        Charge un fichier contenant les feedbacks clients pour afficher un aperçu
+        et les enregistrer dans la base SQLite.
+    </p>
 
     <form method="POST" enctype="multipart/form-data" class="upload-form">
         <input type="file" name="file" accept=".csv" required>
-        <button type="submit" class="btn">Analyser les données</button>
+        <button type="submit" class="btn">Uploader</button>
     </form>
 
     {% if error %}
-    <div class="alert error">
-        <strong>Attention :</strong> {{ error }}
-    </div>
+        <div class="alert error">{{ error }}</div>
     {% endif %}
 
     {% if success %}
-    <div class="alert success">
-        <strong>Succès :</strong> {{ success }}
-    </div>
+        <div class="alert success">{{ success }}</div>
     {% endif %}
 
-    <div
-        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
-        {% if file_info %}
+    {% if file_info %}
         <div class="info-box">
-            <h3>Informations du fichier</h3>
-            <p><strong>Nom :</strong> {{ file_info.filename }}</p>
-            <p><strong>Lignes :</strong> {{ file_info.rows }}</p>
-            <p><strong>Colonnes :</strong> {{ file_info.columns_count }}</p>
+            <p><strong>Nom du fichier :</strong> {{ file_info.filename }}</p>
+            <p><strong>Nombre de lignes :</strong> {{ file_info.rows }}</p>
+            <p><strong>Nombre de colonnes :</strong> {{ file_info.columns_count }}</p>
         </div>
-        {% endif %}
+    {% endif %}
 
-        {% if columns %}
+    {% if import_summary %}
+        <div class="info-box">
+            <h3>Résumé de l'import</h3>
+            <p><strong>Nouveaux feedbacks insérés :</strong> {{ import_summary.inserted }}</p>
+            <p><strong>Doublons ignorés :</strong> {{ import_summary.duplicates }}</p>
+            <p><strong>Total en base :</strong> {{ import_summary.total_in_db }}</p>
+        </div>
+    {% endif %}
+
+    {% if columns %}
         <div class="info-box">
             <h3>Colonnes détectées</h3>
             <ul>
                 {% for col in columns %}
-                <li>{{ col }}</li>
+                    <li>{{ col }}</li>
                 {% endfor %}
             </ul>
         </div>
-        {% endif %}
-    </div>
+    {% endif %}
 
     {% if preview_data %}
-    <div class="table-container">
-        <div style="padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); background-color: #f8fafc;">
-            <h3 style="margin: 0; font-size: 1rem;">Aperçu des 5 premières lignes</h3>
+        <div class="table-container">
+            <h3>Aperçu des données</h3>
+            <table>
+                <thead>
+                    <tr>
+                        {% for key in preview_data[0].keys() %}
+                            <th>{{ key }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in preview_data %}
+                        <tr>
+                            {% for value in row.values() %}
+                                <td>{{ value }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
-        <table>
-            <thead>
-                <tr>
-                    {% for key in preview_data[0].keys() %}
-                    <th>{{ key }}</th>
-                    {% endfor %}
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in preview_data %}
-                <tr>
-                    {% for value in row.values() %}
-                    <td>{{ value }}</td>
-                    {% endfor %}
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
     {% endif %}
 </section>
 {% endblock %}
