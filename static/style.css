@@ -1,35 +1,43 @@
 :root {
-    /* Color Palette - Modern Slate & Indigo */
-    --primary: #4f46e5;
-    --primary-hover: #4338ca;
-    --secondary: #64748b;
-    --bg-main: #f8fafc;
-    --bg-card: #ffffff;
-    --text-main: #0f172a;
-    --text-muted: #64748b;
-    --border: #e2e8f0;
+    /* Professional HSL Design System */
+    --h: 230; /* Primary Hue: Indigo/Royal Blue */
+    --s: 85%;
+    
+    --primary: hsl(var(--h), var(--s), 55%);
+    --primary-hover: hsl(var(--h), var(--s), 45%);
+    --primary-soft: hsl(var(--h), var(--s), 95%);
+    
+    --secondary: hsl(215, 15%, 50%);
+    --bg-main: hsl(210, 20%, 98%);
+    --bg-card: hsl(0, 0%, 100%);
+    --text-main: hsl(220, 30%, 15%);
+    --text-muted: hsl(215, 15%, 45%);
+    --border: hsl(214, 30%, 92%);
 
     /* Semantic Colors */
-    --success: #10b981;
-    --success-bg: #f0fdf4;
-    --success-text: #166534;
-    --danger: #ef4444;
-    --danger-bg: #fef2f2;
-    --danger-text: #991b1b;
-    --warning: #f59e0b;
-    --warning-bg: #fffbeb;
-    --warning-text: #92400e;
-    --info: #3b82f6;
-    --info-bg: #eff6ff;
-    --info-text: #1e40af;
+    --success: hsl(150, 80%, 35%);
+    --success-bg: hsl(150, 80%, 96%);
+    --success-text: hsl(150, 90%, 20%);
+    
+    --danger: hsl(0, 80%, 55%);
+    --danger-bg: hsl(0, 80%, 97%);
+    --danger-text: hsl(0, 90%, 25%);
+    
+    --warning: hsl(35, 90%, 45%);
+    --warning-bg: hsl(35, 90%, 96%);
+    --warning-text: hsl(35, 100%, 20%);
+    
+    --info: hsl(210, 90%, 50%);
+    --info-bg: hsl(210, 90%, 96%);
+    --info-text: hsl(210, 100%, 25%);
 
     /* Spacing & Borders */
     --radius-sm: 8px;
-    --radius-md: 12px;
-    --radius-lg: 20px;
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --radius-md: 14px;
+    --radius-lg: 24px;
+    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+    --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
 }
 
 body {
@@ -96,11 +104,16 @@ body {
 /* Cards */
 .card {
     background: var(--bg-card);
-    padding: 2.5rem;
-    border-radius: var(--radius-lg);
+    padding: 2rem;
+    border-radius: var(--radius-md);
     border: 1px solid var(--border);
     box-shadow: var(--shadow-sm);
     margin-bottom: 2rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    box-shadow: var(--shadow-md);
 }
 
 .card h1,
@@ -140,7 +153,7 @@ body {
 }
 
 .stat-card .value {
-    font-size: 2.5rem;
+    font-size: 2rem;
     font-weight: 800;
     color: var(--text-main);
     margin-top: 0.5rem;
@@ -166,7 +179,8 @@ body {
 
 .btn:hover {
     background: var(--primary-hover);
-    box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px hsl(var(--h), var(--s), 55%, 0.3);
 }
 
 /* Tables */

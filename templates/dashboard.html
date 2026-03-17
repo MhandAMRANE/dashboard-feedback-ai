@@ -1,41 +1,116 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard{% endblock %}
+{% block title %}Dashboard Analytics{% endblock %}
+
+{% block head %}
+<!-- Chart.js for Professional Visuals -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 2rem;
+        gap: 2rem;
+    }
+    
+    .charts-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    @media (max-width: 992px) {
+        .charts-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .chart-container {
+        background: var(--bg-card);
+        padding: 1.5rem;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-sm);
+        height: 350px;
+        position: relative;
+    }
+
+    .sentiment-badge {
+        padding: 4px 12px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<section class="card">
-    <h1>Dashboard Analytique</h1>
-    <p>Consultez l'historique complet des feedbacks stockés en base et enrichis par l'IA.</p>
-
-    <form method="POST" action="{{ url_for('analyze_feedbacks') }}" style="margin-top: 20px;">
-        <button type="submit" class="btn">Lancer l'analyse IA</button>
-    </form>
-
-    {% if analyzed_count is not none %}
-    <div class="alert success">
-        {{ analyzed_count }} feedback(s) analysé(s) avec succès.
+<div class="dashboard-header">
+    <div class="header-info">
+        <h1 style="margin-bottom: 0.5rem;">Dashboard Analytique</h1>
+        <p class="text-muted">Exploitez l'IA pour comprendre vos retours clients en profondeur.</p>
     </div>
-    {% endif %}
-
-    {% if error_messages %}
-    <div class="alert error">
-        <strong>Erreurs pendant l'analyse :</strong>
-        <ul>
-            {% for error in error_messages %}
-            <li>{{ error }}</li>
-            {% endfor %}
-        </ul>
+    
+    <div class="header-actions">
+        <form method="POST" action="{{ url_for('analyze_feedbacks') }}">
+            <button type="submit" class="btn">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right: 8px;">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+                Lancer l'analyse IA
+            </button>
+        </form>
     </div>
-    {% endif %}
+</div>
+
+{% if analyzed_count is not none %}
+<div class="alert success" style="margin-bottom: 2rem; padding: 1rem; background: var(--success-bg); color: var(--success-text); border-radius: var(--radius-sm); border: 1px solid var(--success);">
+    <strong>Succès !</strong> {{ analyzed_count }} feedback(s) analysé(s) avec succès.
+</div>
+{% endif %}
+
+<section class="stats-grid">
+    <div class="stat-card">
+        <h3>Total Feedbacks</h3>
+        <span class="value">{{ sentiment_stats.total }}</span>
+    </div>
+    <div class="stat-card" style="border-left: 4px solid var(--success);">
+        <h3>Positifs</h3>
+        <span class="value" style="color: var(--success);">{{ sentiment_stats.positive }}</span>
+    </div>
+    <div class="stat-card" style="border-left: 4px solid var(--warning);">
+        <h3>Neutres</h3>
+        <span class="value" style="color: var(--warning);">{{ sentiment_stats.neutral }}</span>
+    </div>
+    <div class="stat-card" style="border-left: 4px solid var(--danger);">
+        <h3>Négatifs</h3>
+        <span class="value" style="color: var(--danger);">{{ sentiment_stats.negative }}</span>
+    </div>
 </section>
 
-<section class="card" style="margin-top: 24px;">
-    <h2>Filtres</h2>
+<div class="charts-grid">
+    <div class="chart-container">
+        <h3 style="margin-bottom: 1rem; font-size: 1rem;">Répartition des Sentiments</h3>
+        <canvas id="sentimentChart"></canvas>
+    </div>
+    <div class="chart-container">
+        <h3 style="margin-bottom: 1rem; font-size: 1rem;">Top 10 Thèmes Détectés</h3>
+        <canvas id="themeChart"></canvas>
+    </div>
+</div>
+
+<section class="card">
+    <div class="flex-between" style="border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+        <h2 style="margin: 0;">Filtres de Recherche</h2>
+    </div>
     <form method="GET" action="{{ url_for('dashboard') }}" class="filters-form">
         <div class="filter-group">
             <label for="sentiment">Sentiment</label>
             <select name="sentiment" id="sentiment">
-                <option value="">Tous</option>
+                <option value="">Tous les sentiments</option>
                 <option value="positive" {% if current_sentiment=="positive" %}selected{% endif %}>Positif</option>
                 <option value="neutral" {% if current_sentiment=="neutral" %}selected{% endif %}>Neutre</option>
                 <option value="negative" {% if current_sentiment=="negative" %}selected{% endif %}>Négatif</option>
@@ -43,9 +118,9 @@
         </div>
 
         <div class="filter-group">
-            <label for="theme">Thème</label>
+            <label for="theme">Thème principal</label>
             <select name="theme" id="theme">
-                <option value="">Tous</option>
+                <option value="">Tous les thèmes</option>
                 {% for theme in available_themes %}
                 <option value="{{ theme }}" {% if current_theme==theme %}selected{% endif %}>{{ theme }}</option>
                 {% endfor %}
@@ -53,101 +128,137 @@
         </div>
 
         <div class="filter-group">
-            <label for="date">Date</label>
+            <label for="date">Date précise</label>
             <input type="date" name="date" id="date" value="{{ current_date }}">
         </div>
 
         <div class="filter-actions">
-            <button type="submit" class="btn">Filtrer</button>
-            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Réinitialiser</a>
+            <button type="submit" class="btn">Appliquer</button>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Reset</a>
         </div>
     </form>
 </section>
 
-<section class="stats-grid">
-    <div class="stat-card">
-        <h3>Total</h3>
-        <p>{{ sentiment_stats.total }}</p>
-    </div>
-    <div class="stat-card">
-        <h3>Positifs</h3>
-        <p>{{ sentiment_stats.positive }}</p>
-    </div>
-    <div class="stat-card">
-        <h3>Neutres</h3>
-        <p>{{ sentiment_stats.neutral }}</p>
-    </div>
-    <div class="stat-card">
-        <h3>Négatifs</h3>
-        <p>{{ sentiment_stats.negative }}</p>
-    </div>
-    <div class="stat-card">
-        <h3>Non analysés</h3>
-        <p>{{ sentiment_stats.not_analyzed }}</p>
-    </div>
-</section>
-
-<section class="card" style="margin-top: 24px;">
-    <h2>Top thèmes</h2>
-
-    {% if theme_stats %}
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>Thème</th>
-                    <th>Occurrences</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for theme, count in theme_stats %}
-                <tr>
-                    <td>{{ theme }}</td>
-                    <td>{{ count }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    {% else %}
-    <p>Aucun thème disponible pour le moment.</p>
-    {% endif %}
-</section>
-
-<section class="card" style="margin-top: 24px;">
-    <h2>Historique des feedbacks</h2>
+<section class="card" style="padding: 1.5rem;">
+    <h2 style="margin-bottom: 1.5rem;">Historique Détaillé</h2>
 
     {% if feedbacks %}
-    <div class="table-container">
+    <div class="table-container" style="border: none; border-top: 1px solid var(--border);">
         <table>
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Date</th>
-                    <th>Texte</th>
-                    <th>Sentiment</th>
-                    <th>Thèmes</th>
-                    <th>Confiance</th>
-                    <th>Créé le</th>
+                    <th style="width: 120px;">Date</th>
+                    <th>Message Feedback</th>
+                    <th style="width: 120px;">Sentiment</th>
+                    <th style="width: 200px;">Thèmes</th>
+                    <th style="width: 80px;">Score</th>
                 </tr>
             </thead>
             <tbody>
                 {% for feedback in feedbacks %}
                 <tr>
-                    <td>{{ feedback.id }}</td>
-                    <td>{{ feedback.feedback_date or "-" }}</td>
-                    <td>{{ feedback.text }}</td>
-                    <td>{{ feedback.sentiment or "-" }}</td>
-                    <td>{{ feedback.themes or "-" }}</td>
-                    <td>{{ feedback.confidence or "-" }}</td>
-                    <td>{{ feedback.created_at }}</td>
+                    <td class="text-muted">{{ feedback.feedback_date or "-" }}</td>
+                    <td style="font-weight: 500;">{{ feedback.text }}</td>
+                    <td>
+                        {% if feedback.sentiment == 'positive' %}
+                            <span class="sentiment-badge" style="background: var(--success-bg); color: var(--success-text);">Positif</span>
+                        {% elif feedback.sentiment == 'negative' %}
+                            <span class="sentiment-badge" style="background: var(--danger-bg); color: var(--danger-text);">Négatif</span>
+                        {% elif feedback.sentiment == 'neutral' %}
+                            <span class="sentiment-badge" style="background: var(--warning-bg); color: var(--warning-text);">Neutre</span>
+                        {% else %}
+                            <span class="sentiment-badge" style="background: #f1f5f9; color: var(--secondary);">N/A</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if feedback.themes %}
+                            {% for theme in feedback.themes.split(',') %}
+                                <span style="display: inline-block; background: var(--primary-soft); color: var(--primary); padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; margin: 2px;">{{ theme.strip() }}</span>
+                            {% endfor %}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td style="font-family: monospace; font-weight: bold;">
+                        {% if feedback.confidence %}
+                            {{ (feedback.confidence * 100)|round|int }}%
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
     {% else %}
-    <p>Aucun feedback ne correspond aux filtres sélectionnés.</p>
+    <div class="text-center" style="padding: 3rem;">
+        <p class="text-muted">Aucun feedback ne correspond à vos critères.</p>
+    </div>
     {% endif %}
 </section>
+
+<script>
+    // Sentiment Chart
+    const ctxSentiment = document.getElementById('sentimentChart').getContext('2d');
+    new Chart(ctxSentiment, {
+        type: 'doughnut',
+        data: {
+            labels: ['Positifs', 'Neutres', 'Négatifs'],
+            datasets: [{
+                data: [
+                    {{ sentiment_stats.positive | default(0) }}, 
+                    {{ sentiment_stats.neutral | default(0) }}, 
+                    {{ sentiment_stats.negative | default(0) }}
+                ],
+                backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                borderWidth: 0,
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom' }
+            },
+            cutout: '70%'
+        }
+    });
+
+    // Theme Chart
+    const ctxTheme = document.getElementById('themeChart').getContext('2d');
+    const themeLabels = [];
+    const themeData = [];
+    
+    {% for theme, count in theme_stats %}
+    themeLabels.push("{{ theme }}");
+    themeData.push({{ count }});
+    {% endfor %}
+    
+    new Chart(ctxTheme, {
+        type: 'bar',
+        data: {
+            labels: themeLabels,
+            datasets: [{
+                label: 'Occurrences',
+                data: themeData,
+                backgroundColor: 'rgba(79, 70, 229, 0.6)',
+                borderColor: 'rgb(79, 70, 229)',
+                borderWidth: 1,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            indexAxis: 'y',
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                x: { grid: { display: false }, ticks: { stepSize: 1 } },
+                y: { grid: { display: false } }
+            }
+        }
+    });
+</script>
 {% endblock %}
