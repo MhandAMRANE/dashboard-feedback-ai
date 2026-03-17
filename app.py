@@ -1,7 +1,11 @@
 import os
 import pandas as pd
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_file
 from werkzeug.utils import secure_filename
+import io
+import csv
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
 
 from src.storage import (
     init_db,
@@ -254,6 +258,141 @@ def dashboard():
         current_sentiment=sentiment_filter,
         current_theme=theme_filter,
         current_date=date_filter,
+    )
+
+
+@app.route("/export", methods=["GET"])
+def export_feedbacks():
+    feedbacks = fetch_feedback_dicts()
+    sentiment_filter = request.args.get("sentiment", "").strip()
+    theme_filter = request.args.get("theme", "").strip()
+    date_filter = request.args.get("date", "").strip()
+
+    filtered_feedbacks = apply_filters(
+        feedbacks,
+        sentiment_filter=sentiment_filter if sentiment_filter else None,
+        theme_filter=theme_filter if theme_filter else None,
+        date_filter=date_filter if date_filter else None,
+    )
+
+    # Préparer le CSV en mémoire
+    output = io.StringIO()
+    writer = csv.DictWriter(output, fieldnames=[
+        "id", "feedback_date", "text", "sentiment", "themes", "confidence", "created_at"
+    ])
+    writer.writeheader()
+    for fb in filtered_feedbacks:
+        writer.writerow({
+            "id": fb["id"],
+            "feedback_date": fb["feedback_date"],
+            "text": fb["text"],
+            "sentiment": fb["sentiment"],
+            "themes": fb["themes"],
+            "confidence": fb["confidence"],
+            "created_at": fb["created_at"],
+        })
+    output.seek(0)
+    return send_file(
+        io.BytesIO(output.getvalue().encode()),
+        mimetype="text/csv",
+        as_attachment=True,
+        download_name="feedbacks_export.csv"
+    )
+
+
+@app.route("/export_pdf", methods=["GET"])
+def export_pdf():
+    feedbacks = fetch_feedback_dicts()
+    sentiment_filter = request.args.get("sentiment", "").strip()
+    theme_filter = request.args.get("theme", "").strip()
+    date_filter = request.args.get("date", "").strip()
+
+    filtered_feedbacks = apply_filters(
+        feedbacks,
+        sentiment_filter=sentiment_filter if sentiment_filter else None,
+        theme_filter=theme_filter if theme_filter else None,
+        date_filter=date_filter if date_filter else None,
+    )
+
+    sentiment_stats = compute_sentiment_stats(filtered_feedbacks)
+    theme_stats = compute_theme_stats(filtered_feedbacks)
+
+    # Création du PDF en mémoire
+    buffer = io.BytesIO()
+    p = canvas.Canvas(buffer, pagesize=letter)
+    width, height = letter
+
+    # Titre
+    p.setFont("Helvetica-Bold", 16)
+    p.drawString(50, height - 50, "Rapport d'Analyse des Feedbacks")
+    
+    p.setFont("Helvetica", 10)
+    p.drawString(50, height - 70, f"Filtres appliqués - Sentiment: {sentiment_filter or 'Tous'}, Thème: {theme_filter or 'Tous'}, Date: {date_filter or 'Toutes'}")
+
+    # Statistiques
+    p.setFont("Helvetica-Bold", 12)
+    p.drawString(50, height - 100, "Statistiques Globales :")
+    p.setFont("Helvetica", 10)
+    p.drawString(70, height - 120, f"Total Feedbacks: {sentiment_stats['total']}")
+    p.drawString(70, height - 135, f"Positifs: {sentiment_stats['positive']}")
+    p.drawString(70, height - 150, f"Neutres: {sentiment_stats['neutral']}")
+    p.drawString(70, height - 165, f"Négatifs: {sentiment_stats['negative']}")
+
+    # Top Thèmes
+    p.setFont("Helvetica-Bold", 12)
+    p.drawString(50, height - 200, "Top 10 Thèmes :")
+    y = height - 220
+    for theme, count in theme_stats:
+        p.setFont("Helvetica", 10)
+        p.drawString(70, y, f"- {theme}: {count}")
+        y -= 15
+        if y < 50:
+            p.showPage()
+            y = height - 50
+
+    # Liste des Feedbacks
+    y -= 25
+    if y < 100:
+        p.showPage()
+        y = height - 50
+
+    p.setFont("Helvetica-Bold", 12)
+    p.drawString(50, y, "Détails des Feedbacks :")
+    y -= 20
+
+    for fb in filtered_feedbacks:
+        p.setFont("Helvetica-Bold", 9)
+        date_str = fb['feedback_date'] or "N/A"
+        sentiment_str = (fb['sentiment'] or "N/A").upper()
+        p.drawString(50, y, f"[{date_str}] - {sentiment_str}")
+        y -= 12
+        
+        p.setFont("Helvetica", 9)
+        text = fb['text']
+        # Découpage rudimentaire du texte pour éviter de déborder de la page
+        max_chars = 90
+        lines = [text[i:i+max_chars] for i in range(0, len(text), max_chars)]
+        for line in lines:
+            p.drawString(70, y, line)
+            y -= 12
+            if y < 50:
+                p.showPage()
+                y = height - 50
+        
+        y -= 8
+        if y < 50:
+            p.showPage()
+            y = height - 50
+
+    p.showPage()
+    p.save()
+
+    buffer.seek(0)
+    return send_file(
+        buffer,
+        mimetype="application/pdf",
+        as_attachment=True,
+        download_name="rapport_feedbacks.pdf"
     )
 
 
