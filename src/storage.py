@@ -22,9 +22,43 @@ def init_db():
             sentiment TEXT,
             themes TEXT,
             confidence REAL,
+            judge_sentiment TEXT,
+            judge_themes TEXT,
+            judge_confidence REAL,
+            judge_explanation TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
+
+    conn.commit()
+    conn.close()
+
+
+def get_unjudged_feedbacks(limit=5):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT id, text, sentiment, themes
+        FROM feedbacks
+        WHERE sentiment IS NOT NULL AND judge_sentiment IS NULL
+        LIMIT ?
+    """, (limit,))
+
+    rows = cursor.fetchall()
+    conn.close()
+    return rows
+
+
+def update_feedback_judge(feedback_id, judge_sentiment, judge_themes, judge_confidence, judge_explanation):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        UPDATE feedbacks
+        SET judge_sentiment = ?, judge_themes = ?, judge_confidence = ?, judge_explanation = ?
+        WHERE id = ?
+    """, (judge_sentiment, judge_themes, judge_confidence, judge_explanation, feedback_id))
 
     conn.commit()
     conn.close()
@@ -54,7 +88,8 @@ def get_all_feedbacks():
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT id, feedback_date, text, text_hash, sentiment, themes, confidence, created_at
+        SELECT id, feedback_date, text, text_hash, sentiment, themes, confidence, created_at,
+               judge_sentiment, judge_themes, judge_confidence, judge_explanation
         FROM feedbacks
         ORDER BY id DESC
     """)

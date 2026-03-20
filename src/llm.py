@@ -7,6 +7,7 @@ load_dotenv()
 
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "deepseek/deepseek-chat")
+JUDGE_MODEL = "google/gemini-2.0-flash-001"
 
 ALLOWED_SENTIMENTS = {"positive", "neutral", "negative"}
 ALLOWED_THEMES = {
@@ -124,3 +125,60 @@ def analyze_feedback_with_llm(feedback_text):
         raise ValueError(f"Réponse JSON invalide du modèle : {content}") from e
 
     return validate_analysis(parsed)
+
+
+def analyze_feedback_with_judge(feedback_text, original_sentiment, original_themes):
+    if not OPENROUTER_API_KEY:
+        raise ValueError("Clé OPENROUTER_API_KEY absente du fichier .env")
+
+    url = "https://openrouter.ai/api/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+        "Content-Type": "application/json",
+    }
+
+    prompt = f"""
+Tu es un Juge expert en analyse de feedback client. Ton rôle est d'évaluer une analyse déjà effectuée par une autre IA et de donner ton propre verdict.
+
+Feedback original :
+\"\"\"{feedback_text}\"\"\"
+
+Analyse à évaluer :
+- Sentiment : {original_sentiment}
+- Thèmes : {original_themes}
+
+Instructions :
+1. Analyse le feedback de manière indépendante.
+2. Compare ton analyse avec l'analyse fournie.
+3. Retourne un JSON avec :
+   - "judge_sentiment" : ton propre verdict (positive | neutral | negative)
+   - "judge_themes" : liste de thèmes (delivery, pricing, quality, support, ux, performance, billing, features, other)
+   - "judge_confidence" : ton niveau de confiance (0.0 à 1.0)
+   - "judge_explanation" : une courte explication de ton choix, surtout si tu es en désaccord.
+
+Réponds UNIQUEMENT par un JSON brut.
+"""
+
+    payload = {
+        "model": JUDGE_MODEL,
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.1,
+    }
+
+    response = requests.post(url, headers=headers, json=payload, timeout=60)
+    response.raise_for_status()
+
+    result = response.json()
+    content = result["choices"][0]["message"]["content"].strip()
+
+    if content.startswith("```"):
+        content = content.splitlines()[1:-1]
+        content = "\n".join(content).strip()
+
+    parsed = json.loads(content)
+    
+    # Normalisation basique
+    if parsed["judge_sentiment"] not in ALLOWED_SENTIMENTS:
+        parsed["judge_sentiment"] = "neutral"
+        
+    return parsed

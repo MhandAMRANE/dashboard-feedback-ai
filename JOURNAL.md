@@ -93,7 +93,7 @@ J'ai dû demander à l'IA de restaurer la route `/export` que j'avais écrasée 
 J'ai appris à peupler un document PDF dynamiquement à partir d'une liste de dictionnaires.
 
 ### Ce qui a bloqué ou changé
-La mise en page du PDF a été délicate. Les colonnes étaient trop larges. J'ai dû apprendre à utiliser `TableStyle` pour ajuster la taille des cellules et les polices. Autre blocage : un conflit de port (5000) avec Docker, que j'ai résolu en identifiant et tuant le processus Flask bloqué.
+La mise en page du PDF a été délicate. Les colonnes étaient trop larges. J'ai dû apprendre à gérer les dimensions et les positions avec `reportlab`.
 
 ### Ce que j’en retiens
 Restaurer du code perdu est frustrant, j'ai compris pourquoi Git est indispensable. GitHub m'a sauvé la mise pour synchroniser mes versions.
@@ -118,6 +118,21 @@ Savoir retirer une fonctionnalité est une preuve de maturité. J'ai appris à "
 
 ---
 
+## Session 9 — L'Audit Qualité : "LLM as Judge"
+### Ce que je voulais faire
+Pour aller encore plus loin dans la professionnalisation, je voulais introduire un système de contrôle qualité automatisé. L'idée est d'utiliser un second modèle d'IA (un "Juge") pour auditer les analyses du premier modèle (DeepSeek).
+
+### Comment j’ai travaillé avec l’IA
+J'ai conçu un workflow où un modèle plus puissant (Gemini 2.0 Flash) ré-analyse un échantillon de feedbacks et compare son verdict à l'original. J'ai ajouté un bouton "Audit Qualité" sur le dashboard qui déclenche ce processus.
+
+### Ce qui a bloqué ou changé
+Le principal défi était technique : modifier la structure de la base de données SQLite pour stocker les avis du juge sans perdre les données existantes. J'ai aussi dû gérer les cas de "désaccord" entre les deux IA pour les afficher clairement dans l'interface.
+
+### Ce que j’en retiens
+C'est une avancée majeure. Cela montre qu'on ne fait pas aveuglément confiance à l'IA, mais qu'on met en place des garde-fous. Le badge "Confirmé" ou "Désaccord" sur le dashboard apporte une transparence totale sur la fiabilité des données.
+
+---
+
 ## Focus sur les choix technologiques : SQLite et OpenRouter
 
 Comme vous m'avez mentionné que vous n'aviez pas encore utilisé SQLite et OpenRouter, voici mon retour d'expérience sur leur utilisation et comment cela fonctionne concrètement dans ce projet :
@@ -138,6 +153,11 @@ Afin de rendre ce projet encore plus complet et professionnel, j'envisage plusie
 - **Visualisation temporelle** : Ajouter des graphiques en ligne (Time series) pour voir comment le sentiment des clients évolue de mois en mois.
 - **Recherche avancée** : Intégrer une barre de recherche pour retrouver rapidement un feedback précis par mot-clé ou par date.
 - **Suggestions d'actions IA** : Aller au-delà de l'analyse et demander à l'IA de proposer des solutions concrètes (ex: "Améliorer le processus de login" ou "Vérifier le bug sur la page de paiement") à partir des critiques récurrentes.
+
+---
+
+## Conclusion : LLM as Judge - Un gage de qualité
+J'ai finalement implémenté cette fonctionnalité d'audit. Elle permet d'afficher pour chaque feedback si l'analyse est **confirmée** par un second regard expert (Gemini) ou s'il y a un **désaccord**. C'est un pas de plus vers une IA responsable et fiable.
 
 Ce projet n'est qu'une première étape. La base est solide, et ces évolutions en feraient un outil d'aide à la décision extrêmement puissant pour n'importe quelle entreprise.
 

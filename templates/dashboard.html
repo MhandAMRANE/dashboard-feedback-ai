@@ -55,7 +55,7 @@
     </div>
     
     <div class="header-actions">
-        <form method="POST" action="{{ url_for('analyze_feedbacks') }}">
+        <form method="POST" action="{{ url_for('analyze_feedbacks') }}" style="display: inline-block;">
             <button type="submit" class="btn">
                 <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right: 8px;">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
@@ -63,8 +63,22 @@
                 Lancer l'analyse IA
             </button>
         </form>
+        <form method="POST" action="{{ url_for('judge_feedbacks') }}" style="display: inline-block; margin-left: 0.5rem;">
+            <button type="submit" class="btn btn-secondary" style="background: var(--primary-soft); color: var(--primary); border: 1px solid var(--primary-soft);">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right: 8px;">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                </svg>
+                Audit Qualité (LLM Judge)
+            </button>
+        </form>
     </div>
 </div>
+
+{% if judged_count is not none %}
+<div class="alert success" style="margin-bottom: 2rem; padding: 1rem; background: #e0f2fe; color: #0369a1; border-radius: var(--radius-sm); border: 1px solid #7dd3fc;">
+    <strong>Audit Terminé !</strong> {{ judged_count }} analyse(s) auditée(s) par le juge IA.
+</div>
+{% endif %}
 
 {% if analyzed_count is not none %}
 <div class="alert success" style="margin-bottom: 2rem; padding: 1rem; background: var(--success-bg); color: var(--success-text); border-radius: var(--radius-sm); border: 1px solid var(--success);">
@@ -160,6 +174,7 @@
                     <th style="width: 120px;">Sentiment</th>
                     <th style="width: 200px;">Thèmes</th>
                     <th style="width: 80px;">Score</th>
+                    <th style="width: 150px;">Audit IA</th>
                 </tr>
             </thead>
             <tbody>
@@ -192,6 +207,23 @@
                             {{ (feedback.confidence * 100)|round|int }}%
                         {% else %}
                             -
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if feedback.judge_sentiment %}
+                            {% if feedback.judge_sentiment == feedback.sentiment %}
+                                <span class="sentiment-badge" style="background: #ecfdf5; color: #065f46; display: flex; align-items: center; gap: 4px; font-size: 0.65rem;" title="{{ feedback.judge_explanation }}">
+                                    <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                    Confirmé
+                                </span>
+                            {% else %}
+                                <span class="sentiment-badge" style="background: #fff1f2; color: #991b1b; display: flex; align-items: center; gap: 4px; font-size: 0.65rem;" title="{{ feedback.judge_explanation }}">
+                                    <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                    Désaccord
+                                </span>
+                            {% endif %}
+                        {% else %}
+                            <span class="text-muted" style="font-size: 0.7rem;">En attente</span>
                         {% endif %}
                     </td>
                 </tr>

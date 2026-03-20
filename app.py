@@ -14,9 +14,11 @@ from src.storage import (
     get_all_feedbacks,
     get_unanalyzed_feedbacks,
     update_feedback_analysis,
+    get_unjudged_feedbacks,
+    update_feedback_judge,
 )
 from src.utils import clean_text, generate_text_hash, normalize_date
-from src.llm import analyze_feedback_with_llm
+from src.llm import analyze_feedback_with_llm, analyze_feedback_with_judge
 from src.analytics import compute_sentiment_stats, compute_theme_stats
 
 app = Flask(__name__)
@@ -45,6 +47,10 @@ def fetch_feedback_dicts():
             "themes": row[5],
             "confidence": row[6],
             "created_at": row[7],
+            "judge_sentiment": row[8],
+            "judge_themes": row[9],
+            "judge_confidence": row[10],
+            "judge_explanation": row[11],
         }
         for row in rows
     ]
@@ -218,6 +224,45 @@ def analyze_feedbacks():
         "dashboard.html",
         feedbacks=feedbacks,
         analyzed_count=analyzed_count,
+        error_messages=error_messages,
+        sentiment_stats=sentiment_stats,
+        theme_stats=theme_stats,
+        available_themes=available_themes,
+        current_sentiment="",
+        current_theme="",
+        current_date="",
+    )
+
+
+@app.route("/judge", methods=["POST"])
+def judge_feedbacks():
+    unjudged_feedbacks = get_unjudged_feedbacks(limit=3)
+    judged_count = 0
+    error_messages = []
+
+    for feedback_id, text, sentiment, themes in unjudged_feedbacks:
+        try:
+            result = analyze_feedback_with_judge(text, sentiment, themes)
+            update_feedback_judge(
+                feedback_id=feedback_id,
+                judge_sentiment=result["judge_sentiment"],
+                judge_themes=", ".join(result["judge_themes"]),
+                judge_confidence=result["judge_confidence"],
+                judge_explanation=result["judge_explanation"],
+            )
+            judged_count += 1
+        except Exception as e:
+            error_messages.append(f"Feedback ID {feedback_id} (Judge): {str(e)}")
+
+    feedbacks = fetch_feedback_dicts()
+    sentiment_stats = compute_sentiment_stats(feedbacks)
+    theme_stats = compute_theme_stats(feedbacks)
+    available_themes = get_available_themes(feedbacks)
+
+    return render_template(
+        "dashboard.html",
+        feedbacks=feedbacks,
+        judged_count=judged_count,
         error_messages=error_messages,
         sentiment_stats=sentiment_stats,
         theme_stats=theme_stats,
