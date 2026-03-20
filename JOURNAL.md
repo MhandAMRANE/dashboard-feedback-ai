@@ -140,3 +140,10 @@ Afin de rendre ce projet encore plus complet et professionnel, j'envisage plusie
 - **Suggestions d'actions IA** : Aller au-delà de l'analyse et demander à l'IA de proposer des solutions concrètes (ex: "Améliorer le processus de login" ou "Vérifier le bug sur la page de paiement") à partir des critiques récurrentes.
 
 Ce projet n'est qu'une première étape. La base est solide, et ces évolutions en feraient un outil d'aide à la décision extrêmement puissant pour n'importe quelle entreprise.
+
+---
+
+## Annexe : Format de données attendu (CSV)
+Le fichier CSV importé doit contenir au minimum les colonnes suivantes :
+- `text` : Le contenu du feedback (obligatoire).
+- `date` : La date du feedback (optionnel, format AAAA-MM-JJ).

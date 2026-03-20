@@ -1,85 +1,102 @@
-# 🚀 Feedback AI - Dashboard Analytique Intelligent
+# 🚀 Feedback AI – Analyse Intelligente de Retours Clients
 
-**Feedback AI** est une application web moderne conçue pour transformer les retours clients bruts (CSV) en insights actionnables grâce à l'intelligence artificielle. 
+**Feedback AI** est une solution puissante et intuitive conçue pour transformer vos données clients brutes en insights actionnables. Grâce à l'intégration de modèles de langage avancés (LLM) via OpenRouter, l'application automatise l'analyse de sentiment et la détection de thèmes pour vous aider à prendre des décisions éclairées.
 
-L'outil permet d'importer des feedbacks, de les stocker de manière persistante, de les analyser (sentiment, thématiques) via des LLM, et d'exporter des rapports professionnels.
+![Landing Page](file:///C:/Users/Etudiant/.gemini/antigravity/brain/8dd88dd4-1384-4e58-acd6-9138717d7745/dashboard_feedback_ai_main_page_1774036968050.png)
 
 ---
 
-## ✨ Fonctionnalités Clés
+## 🌟 Fonctionnalités Clés
 
-- **📥 Import Intelligent** : Dépôt de fichiers CSV avec aperçu dynamique via Pandas.
-- **🗄️ Stockage Persistant** : Base de données SQLite locale pour conserver l'historique des analyses.
-- **🤖 Analyse IA (LLM)** : Détection automatique des sentiments (Positif, Neutre, Négatif) et des thématiques clés (Service, Prix, UX, Bug, etc.) via OpenRouter.
-- **📊 Dashboard Interactif** : 
-    - Cartes de scores en temps réel.
-    - Graphiques de répartition (Chart.js).
-    - Filtres multicritères (Sentiment, Thème, Date).
-- **📄 Exportation Multi-format** : 
-    - Exportation des données brutes en **CSV**.
-    - Génération de rapports d'analyse professionnels en **PDF** (ReportLab).
+- **📥 Import CSV Dynamique** : Importez facilement vos fichiers de retours clients avec un aperçu instantané et une validation automatique des données.
+- **🧠 Analyse IA (LLM)** : Utilise des modèles de pointe (DeepSeek, GPT-4, etc.) pour qualifier chaque feedback :
+  - **Sentiment** : Positif, Neutre ou Négatif.
+  - **Thématiques** : Identification automatique parmi 9 catégories (Support, Qualité, Prix, UX, etc.).
+- **📊 Dashboard Interactif** : Visualisez les tendances globales via des graphiques dynamiques (Chart.js) et filtrez les données par sentiment, thème ou date.
+- **📄 Rapports & Exports** : Exportez vos analyses au format **CSV** pour un traitement externe ou générez un rapport **PDF** professionnel.
+- **🗄️ Stockage Local Sécurisé** : Vos données sont conservées localement dans une base de données SQLite performante.
 
 ---
 
 ## 🛠️ Stack Technique
 
-- **Backend** : Python 3.9+ / Flask
-- **Data** : Pandas (Traitement CSV) / SQLite (Base de données locale)
-- **IA** : OpenRouter (Accès unifié aux modèles comme Gemini, GPT-4, Llama)
-- **Frontend** : HTML5 / CSS3 (Vanilla) / Chart.js (Visualisation)
+- **Backend** : Python 3.13+, Flask (Web Framework)
+- **Analyse de Données** : Pandas
+- **Intelligence Artificielle** : OpenRouter API (Accessibilité à plusieurs LLMs)
+- **Base de Données** : SQLite
+- **Frontend** : HTML5, CSS3 Moderne, Chart.js (Visualisation)
 - **Reporting** : ReportLab (Génération PDF)
 
 ---
 
-## 🚀 Installation et Lancement
+## 🚀 Installation & Lancement
 
-1. **Cloner le projet** :
-   ```bash
-   git clone https://github.com/MhandAMRANE/dashboard-feedback-ai.git
-   cd dashboard-feedback-ai
-   ```
-
-2. **Installer les dépendances** :
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. **Configurer les variables d'environnement** :
-   - Créez un fichier `.env` à la racine :
-     ```text
-     OPENROUTER_API_KEY=votre_clé_ici
-     OPENROUTER_MODEL=deepseek/deepseek-chat
-     DATABASE_URL=sqlite:///database/feedbacks.db
-     ```
-
-4. **Lancer l'application** :
-   ```bash
-   python app.py
-   ```
-   Accédez à l'interface sur : `http://127.0.0.1:5000`
-
----
-
-## 📂 Structure du Projet
-
-```text
-dashboard-feedback-ai/
-├── app.py              # Point d'entrée Flask et routes
-├── src/                # Logique métier
-│   ├── llm.py          # Appels API OpenRouter
-│   ├── storage.py      # Gestion SQLite
-│   ├── analytics.py    # Calculs et statistiques
-│   └── utils.py        # Fonctions utilitaires
-├── templates/          # Pages HTML (Jinja2)
-├── static/             # Styles CSS et Scripts JS
-├── data/               # Dossier de stockage des CSV importés
-└── database/           # Fichier feedbacks.db (SQLite)
+### 1. Cloner le projet
+```bash
+git clone https://github.com/MhandAMRANE/dashboard-feedback-ai.git
+cd dashboard-feedback-ai
 ```
 
+### 2. Configurer l'environnement virtuel (Recommandé)
+```bash
+python -m venv .venv
+# Sur Windows :
+.\.venv\Scripts\activate
+# Sur macOS/Linux :
+source .venv/bin/activate
+```
+
+### 3. Installer les dépendances
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Configuration des variables d'environnement
+Créez un fichier `.env` à la racine (ou copiez `.env.example`) :
+```env
+OPENROUTER_API_KEY=votre_cle_api_ici
+OPENROUTER_MODEL=deepseek/deepseek-chat
+DATABASE_URL=sqlite:///database/feedbacks.db
+SECRET_KEY=votre_cle_secrete_flask
+```
+
+### 5. Lancer l'application
+```bash
+python app.py
+```
+Accédez à l'interface sur : **[http://127.0.0.1:5000](http://127.0.0.1:5000)**
+
 ---
 
-## 📝 Journal de Développement
-Pour plus de détails sur les choix de conception, les pivots techniques (comme l'abandon du système d'alertes) et l'évolution du projet, consultez le fichier [JOURNAL.md](./JOURNAL.md).
+## 📊 Aperçu du Dashboard
+
+Le tableau de bord vous permet de piloter la satisfaction client en un coup d'œil.
+
+![Dashboard](file:///C:/Users/Etudiant/.gemini/antigravity/brain/8dd88dd4-1384-4e58-acd6-9138717d7745/dashboard_content_1774037000542.png)
 
 ---
-*Projet réalisé dans le cadre du module [Nom du module] - 2026*
+
+## 🐳 Lancement avec Docker
+
+Si vous préférez utiliser Docker, une configuration `docker-compose` est disponible :
+
+```bash
+docker-compose up --build
+```
+L’application sera accessible sur [http://localhost:5000](http://localhost:5000).
+
+---
+
+## 📝 Format de données attendu (CSV)
+Le fichier CSV importé doit contenir au minimum les colonnes suivantes :
+- `text` : Le contenu du feedback (obligatoire).
+- `date` : La date du feedback (optionnel, format AAAA-MM-JJ).
+
+---
+
+## 🤝 Contribution
+Les contributions sont les bienvenues ! N'hésitez pas à ouvrir une *Issue* ou à soumettre une *Pull Request*.
+
+---
+
+*Développé avec ❤️ pour une meilleure compréhension des clients.*
