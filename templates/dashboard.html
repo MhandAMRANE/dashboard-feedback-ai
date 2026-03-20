@@ -175,12 +175,13 @@
                     <th style="width: 200px;">Thèmes</th>
                     <th style="width: 80px;">Score</th>
                     <th style="width: 150px;">Audit IA</th>
+                    <th>Explication Audit</th>
                 </tr>
             </thead>
             <tbody>
                 {% for feedback in feedbacks %}
                 <tr>
-                    <td class="text-muted">{{ feedback.feedback_date or "-" }}</td>
+                    <td class="text-muted">{{ feedback.feedback_date_raw or "-" }}</td>
                     <td style="font-weight: 500;">{{ feedback.text }}</td>
                     <td>
                         {% if feedback.sentiment == 'positive' %}
@@ -225,6 +226,9 @@
                         {% else %}
                             <span class="text-muted" style="font-size: 0.7rem;">En attente</span>
                         {% endif %}
+                    </td>
+                    <td class="text-muted" style="font-size: 0.85rem; font-style: italic;">
+                        {{ feedback.judge_explanation or "-" }}
                     </td>
                 </tr>
                 {% endfor %}

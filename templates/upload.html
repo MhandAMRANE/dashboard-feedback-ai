@@ -86,5 +86,75 @@
         </div>
     </div>
     {% endif %}
+
+    <div style="margin-top: 3rem; border-top: 1px solid var(--border); padding-top: 2rem;">
+        <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem; color: var(--text-main);">Gestion des Fichiers</h2>
+        
+        {% if imported_files %}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nom du Fichier</th>
+                        <th style="width: 100px;">Feedbacks</th>
+                        <th style="width: 150px;">Date d'import</th>
+                        <th style="width: 120px; text-align: center;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for filename, count, created_at in imported_files %}
+                    <tr>
+                        <td style="display: flex; align-items: center; gap: 8px;">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="opacity: 0.5;">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <strong>{{ filename }}</strong>
+                        </td>
+                        <td>{{ count }}</td>
+                        <td class="text-muted">{{ created_at[:10] }}</td>
+                        <td style="text-align: center;">
+                            <form action="{{ url_for('delete_file') }}" method="POST" onsubmit="return confirm('Confirmer la suppression de ce fichier et de toutes ses analyses ?');" style="display: inline;">
+                                <input type="hidden" name="filename" value="{{ filename }}">
+                                <button type="submit" class="btn" style="padding: 6px 12px; font-size: 0.8rem; background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca;">
+                                    Supprimer
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 2rem; background: #f9fafb; border-radius: 8px; border: 1px dashed var(--border);">
+            <p class="text-muted">Aucun fichier importé actuellement.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Danger Zone : Reset Database -->
+    <div style="margin-top: 4rem; border-top: 1px solid var(--danger); padding-top: 2rem; background: #fff0f0; padding: 2rem; border-radius: 8px;">
+        <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--danger);">Zone de Danger</h2>
+        <p style="color: var(--danger-text); margin-bottom: 1.5rem;">Cette action va supprimer tous les feedbacks de la base de données et effacer tous les fichiers CSV importés. Cette action est irréversible.</p>
+        
+        <form action="{{ url_for('reset_database') }}" method="POST" onsubmit="return confirm('ATTENTION : Êtes-vous sûr de vouloir vider complètement la base de données et supprimer tous les fichiers importés ? Cette action est définitive.');">
+            <button type="submit" class="btn" style="padding: 0.8rem 1.5rem; font-size: 1rem; font-weight: bold; background: var(--danger); color: white; border: none; width: 100%;">
+                Vider la base de données
+            </button>
+        </form>
+    </div>
+
+    <!-- Danger Zone : Reset Database -->
+    <div style="margin-top: 4rem; border-top: 1px solid var(--danger); padding-top: 2rem; background: #fff0f0; padding: 2rem; border-radius: 8px;">
+        <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--danger);">Zone de Danger</h2>
+        <p style="color: var(--danger-text); margin-bottom: 1.5rem;">Cette action va supprimer tous les feedbacks de la base de données et effacer tous les fichiers CSV importés. Cette action est irréversible.</p>
+        
+        <form action="{{ url_for('reset_database') }}" method="POST" onsubmit="return confirm('ATTENTION : Êtes-vous sûr de vouloir vider complètement la base de données et supprimer tous les fichiers importés ? Cette action est définitive.');">
+            <button type="submit" class="btn" style="padding: 0.8rem 1.5rem; font-size: 1rem; font-weight: bold; background: var(--danger); color: white; border: none; width: 100%;">
+                Vider la base de données
+            </button>
+        </form>
+    </div>
 </section>
+
 {% endblock %}

@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-from flask import Flask, render_template, request, send_file
+from flask import Flask, render_template, request, send_file, redirect, url_for
 from werkzeug.utils import secure_filename
 import io
 import csv
@@ -16,6 +16,9 @@ from src.storage import (
     update_feedback_analysis,
     get_unjudged_feedbacks,
     update_feedback_judge,
+    delete_feedbacks_by_file,
+    get_imported_files,
+    delete_all_feedbacks,
 )
 from src.utils import clean_text, generate_text_hash, normalize_date
 from src.llm import analyze_feedback_with_llm, analyze_feedback_with_judge
@@ -40,7 +43,7 @@ def fetch_feedback_dicts():
     return [
         {
             "id": row[0],
-            "feedback_date": row[1],
+            "feedback_date_raw": row[1],
             "text": row[2],
             "text_hash": row[3],
             "sentiment": row[4],
@@ -54,6 +57,7 @@ def fetch_feedback_dicts():
         }
         for row in rows
     ]
+
 
 
 def apply_filters(feedbacks, sentiment_filter=None, theme_filter=None, date_filter=None):
@@ -104,6 +108,7 @@ def upload_page():
     success = None
     file_info = None
     import_summary = None
+    imported_files = get_imported_files()
 
     if request.method == "POST":
         if "file" not in request.files:
@@ -168,7 +173,7 @@ def upload_page():
                             feedback_date = normalize_date(row.get("date"))
                             text_hash = generate_text_hash(text)
 
-                            inserted = insert_feedback(feedback_date, text, text_hash)
+                            inserted = insert_feedback(feedback_date, text, text_hash, source_file=filename)
                             if inserted:
                                 inserted_count += 1
                             else:
@@ -179,6 +184,9 @@ def upload_page():
                             "duplicates": duplicate_count,
                             "total_in_db": count_feedbacks(),
                         }
+                        
+                        # Refresh list after import
+                        imported_files = get_imported_files()
 
             except Exception as e:
                 error = f"Erreur lors de la lecture du CSV : {str(e)}"
@@ -193,6 +201,7 @@ def upload_page():
         success=success,
         file_info=file_info,
         import_summary=import_summary,
+        imported_files=imported_files,
     )
 
 
@@ -439,6 +448,41 @@ def export_pdf():
         as_attachment=True,
         download_name="rapport_feedbacks.pdf"
     )
+
+
+
+@app.route("/delete_file", methods=["POST"])
+def delete_file():
+    filename = request.form.get("filename")
+    if filename:
+        # 1. Delete from database
+        delete_feedbacks_by_file(filename)
+        
+        # 2. Delete from disk
+        filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+        if os.path.exists(filepath):
+            os.remove(filepath)
+            
+    return redirect(url_for("upload_page"))
+
+
+@app.route("/reset_database", methods=["POST"])
+def reset_database():
+    # 1. Delete all records from database
+    delete_all_feedbacks()
+    
+    # 2. Delete all uploaded CSV files
+    upload_folder = app.config["UPLOAD_FOLDER"]
+    if os.path.exists(upload_folder):
+        for filename in os.listdir(upload_folder):
+            if allowed_file(filename):
+                filepath = os.path.join(upload_folder, filename)
+                try:
+                    os.remove(filepath)
+                except Exception as e:
+                    print(f"Error deleting file {filename}: {e}")
+                    
+    return redirect(url_for("upload_page"))
 
 
 if __name__ == "__main__":

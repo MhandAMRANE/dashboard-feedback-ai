@@ -26,6 +26,7 @@ def init_db():
             judge_themes TEXT,
             judge_confidence REAL,
             judge_explanation TEXT,
+            source_file TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
@@ -64,15 +65,15 @@ def update_feedback_judge(feedback_id, judge_sentiment, judge_themes, judge_conf
     conn.close()
 
 
-def insert_feedback(feedback_date, text, text_hash):
+def insert_feedback(feedback_date, text, text_hash, source_file=None):
     conn = get_connection()
     cursor = conn.cursor()
 
     try:
         cursor.execute("""
-            INSERT INTO feedbacks (feedback_date, text, text_hash)
-            VALUES (?, ?, ?)
-        """, (feedback_date, text, text_hash))
+            INSERT INTO feedbacks (feedback_date, text, text_hash, source_file)
+            VALUES (?, ?, ?, ?)
+        """, (feedback_date, text, text_hash, source_file))
         conn.commit()
         inserted = True
     except sqlite3.IntegrityError:
@@ -136,5 +137,41 @@ def update_feedback_analysis(feedback_id, sentiment, themes, confidence):
         WHERE id = ?
     """, (sentiment, themes, confidence, feedback_id))
 
+    conn.commit()
+    conn.close()
+
+
+def delete_feedbacks_by_file(filename):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("DELETE FROM feedbacks WHERE source_file = ?", (filename,))
+    
+    conn.commit()
+    conn.close()
+
+
+def get_imported_files():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT source_file, COUNT(*), MIN(created_at)
+        FROM feedbacks
+        WHERE source_file IS NOT NULL
+        GROUP BY source_file
+        ORDER BY MIN(created_at) DESC
+    """)
+    
+    rows = cursor.fetchall()
+    conn.close()
+    return rows
+
+def delete_all_feedbacks():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("DELETE FROM feedbacks")
+    
     conn.commit()
     conn.close()

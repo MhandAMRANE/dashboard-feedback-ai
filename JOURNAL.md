@@ -156,8 +156,23 @@ Afin de rendre ce projet encore plus complet et professionnel, j'envisage plusie
 
 ---
 
-## Conclusion : LLM as Judge - Un gage de qualité
-J'ai finalement implémenté cette fonctionnalité d'audit. Elle permet d'afficher pour chaque feedback si l'analyse est **confirmée** par un second regard expert (Gemini) ou s'il y a un **désaccord**. C'est un pas de plus vers une IA responsable et fiable.
+## Session 10 — La Maîtrise des Données : Gestion des imports
+### Ce que je voulais faire
+Pour rendre l'outil vraiment utilisable, il fallait pouvoir "faire le ménage". Si un utilisateur importe le mauvais fichier, il doit pouvoir le supprimer sans tout effacer.
+
+### Comment j’ai travaillé avec l’IA
+J'ai transformé la base de données pour qu'elle "se souvienne" de l'origine de chaque feedback (`source_file`). J'ai ensuite créé une interface simple sur la page d'importation qui liste les fichiers et permet la suppression en un clic (base de données + fichier physique).
+
+### Ce qui a bloqué ou changé
+Un petit oubli d'importation (`redirect`) a causé un bug passager lors des tests, mais il a été corrigé instantanément. La structure est maintenant robuste.
+
+### Ce que j’en retiens
+La gestion granulaire des données est ce qui transforme un prototype en un véritable logiciel. Pouvoir importer, auditer par IA, puis supprimer sélectivement donne un contrôle total à l'utilisateur.
+
+---
+
+## Conclusion : Un outil complet et fiable
+L'application propose désormais un cycle de vie complet pour le feedback : Importation sécurisée, Analyse par DeepSeek, Audit Qualité par Gemini (LLM as Judge) et Gestion granulaire des fichiers. C'est une base solide pour n'importe quelle analyse de sentiment professionnelle.
 
 Ce projet n'est qu'une première étape. La base est solide, et ces évolutions en feraient un outil d'aide à la décision extrêmement puissant pour n'importe quelle entreprise.
 
