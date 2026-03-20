@@ -114,3 +114,29 @@ Ce n'est pas un échec, c'est un choix conscient de garder un produit simple et 
 
 ### Ce que j’en retiens
 Savoir retirer une fonctionnalité est une preuve de maturité. J'ai appris à "nettoyer" mon repo Git pour qu'il soit propre et prêt à être rendu sans "code mort".
+
+
+---
+
+## Focus sur les choix technologiques : SQLite et OpenRouter
+
+Comme vous m'avez mentionné que vous n'aviez pas encore utilisé SQLite et OpenRouter, voici mon retour d'expérience sur leur utilisation et comment cela fonctionne concrètement dans ce projet :
+
+- **SQLite** : Contrairement à MySQL ou PostgreSQL, SQLite ne nécessite pas d'installer un serveur de base de données. Toute la base est stockée dans un simple fichier (`feedbacks.db`). C'est extrêmement pratique pour le développement et pour vous permettre de tester le projet sans configuration complexe. C'est robuste, rapide et parfait pour une application de ce type.
+- **OpenRouter** : C'est une plateforme qui "unifie" l'accès à de nombreux modèles d'IA (OpenAI, Gemini, Claude, Mistral). Au lieu de m'enfermer dans une seule API, OpenRouter me permet de switcher de modèle en changeant juste une ligne de code dans le `.env`. Pour ce projet, cela m'a permis de tester quel modèle était le plus performant pour l'analyse de sentiment.
+
+---
+
+## Perspectives et évolutions futures
+
+Afin de rendre ce projet encore plus complet et professionnel, j'envisage plusieurs pistes d'amélioration pour la suite :
+
+- **Authentification et Sécurité** : Ajouter un système de connexion (Login) pour que seul l'administrateur puisse accéder au dashboard et aux données sensibles.
+- **Analyse multilingue** : Détecter automatiquement la langue des feedbacks (français, anglais, espagnol...) et adapter l'analyse de sentiment en conséquence.
+- **Tagging manuel et correction** : Permettre à l'utilisateur de corriger manuellement un sentiment ou un thème si l'IA s'est trompée, afin d'améliorer la fiabilité des statistiques.
+- **Alertes automatiques (Email)** : Réintégrer le système d'alertes mais avec un envoi d'email réel (via SMTP ou une API comme SendGrid) pour être prévenu immédiatement en cas de crise (pics de retours négatifs).
+- **Visualisation temporelle** : Ajouter des graphiques en ligne (Time series) pour voir comment le sentiment des clients évolue de mois en mois.
+- **Recherche avancée** : Intégrer une barre de recherche pour retrouver rapidement un feedback précis par mot-clé ou par date.
+- **Suggestions d'actions IA** : Aller au-delà de l'analyse et demander à l'IA de proposer des solutions concrètes (ex: "Améliorer le processus de login" ou "Vérifier le bug sur la page de paiement") à partir des critiques récurrentes.
+
+Ce projet n'est qu'une première étape. La base est solide, et ces évolutions en feraient un outil d'aide à la décision extrêmement puissant pour n'importe quelle entreprise.
