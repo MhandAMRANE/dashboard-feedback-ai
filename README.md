@@ -1,24 +1,20 @@
-# 🚀 Feedback AI – Analyse Intelligente de Retours Clients
+#  Feedback AI – Analyse Intelligente de Retours Clients
 
-**Feedback AI** est une solution puissante et intuitive conçue pour transformer vos données clients brutes en insights actionnables. Grâce à l'intégration de modèles de langage avancés (LLM) via OpenRouter, l'application automatise l'analyse de sentiment et la détection de thèmes pour vous aider à prendre des décisions éclairées.
 
-![Landing Page](file:///C:/Users/Etudiant/.gemini/antigravity/brain/8dd88dd4-1384-4e58-acd6-9138717d7745/dashboard_feedback_ai_main_page_1774036968050.png)
 
----
+##  Fonctionnalités Clés
 
-## 🌟 Fonctionnalités Clés
-
-- **📥 Import CSV Dynamique** : Importez facilement vos fichiers de retours clients avec un aperçu instantané et une validation automatique des données.
-- **🧠 Analyse IA (LLM)** : Utilise des modèles de pointe (DeepSeek, GPT-4, etc.) pour qualifier chaque feedback :
+- ** Import CSV Dynamique** : Importez facilement vos fichiers de retours clients avec un aperçu instantané et une validation automatique des données.
+- ** Analyse IA (LLM)** : Utilise des modèles de pointe (DeepSeek, GPT-4, etc.) pour qualifier chaque feedback :
   - **Sentiment** : Positif, Neutre ou Négatif.
   - **Thématiques** : Identification automatique parmi 9 catégories (Support, Qualité, Prix, UX, etc.).
-- **📊 Dashboard Interactif** : Visualisez les tendances globales via des graphiques dynamiques (Chart.js) et filtrez les données par sentiment, thème ou date.
-- **📄 Rapports & Exports** : Exportez vos analyses au format **CSV** pour un traitement externe ou générez un rapport **PDF** professionnel.
-- **🗄️ Stockage Local Sécurisé** : Vos données sont conservées localement dans une base de données SQLite performante.
+- **Dashboard Interactif** : Visualisez les tendances globales via des graphiques dynamiques (Chart.js) et filtrez les données par sentiment, thème ou date.
+- **Rapports & Exports** : Exportez vos analyses au format **CSV** pour un traitement externe ou générez un rapport **PDF** professionnel.
+- **Stockage Local Sécurisé** : Vos données sont conservées localement dans une base de données SQLite performante.
 
 ---
 
-## 🛠️ Stack Technique
+## Stack Technique
 
 - **Backend** : Python 3.13+, Flask (Web Framework)
 - **Analyse de Données** : Pandas
@@ -29,7 +25,7 @@
 
 ---
 
-## 🚀 Installation & Lancement
+## Installation & Lancement
 
 ### 1. Cloner le projet
 ```bash
@@ -64,39 +60,28 @@ SECRET_KEY=votre_cle_secrete_flask
 ```bash
 python app.py
 ```
-Accédez à l'interface sur : **[http://127.0.0.1:5000](http://127.0.0.1:5000)**
+Accédez à l'interface sur : **[http://127.0.0.1:5000]**
 
 ---
 
-## 📊 Aperçu du Dashboard
-
-Le tableau de bord vous permet de piloter la satisfaction client en un coup d'œil.
-
-![Dashboard](file:///C:/Users/Etudiant/.gemini/antigravity/brain/8dd88dd4-1384-4e58-acd6-9138717d7745/dashboard_content_1774037000542.png)
+## Aperçu du Dashboard
 
 ---
 
-## 🐳 Lancement avec Docker
+##  Lancement avec Docker
 
 Si vous préférez utiliser Docker, une configuration `docker-compose` est disponible :
 
 ```bash
 docker-compose up --build
 ```
-L’application sera accessible sur [http://localhost:5000](http://localhost:5000).
+L’application sera accessible sur [http://localhost:5000].
 
 ---
 
-## 📝 Format de données attendu (CSV)
+## Format de données attendu (CSV)
 Le fichier CSV importé doit contenir au minimum les colonnes suivantes :
 - `text` : Le contenu du feedback (obligatoire).
 - `date` : La date du feedback (optionnel, format AAAA-MM-JJ).
 
----
 
-## 🤝 Contribution
-Les contributions sont les bienvenues ! N'hésitez pas à ouvrir une *Issue* ou à soumettre une *Pull Request*.
-
----
-
-*Développé avec ❤️ pour une meilleure compréhension des clients.*

@@ -1,4 +1,4 @@
-# Journal de Développement - Feedback AI
+# Journal de Développement - Dashboard d’analyse de feedback client
 
 Ce projet a pour but de créer un dashboard intelligent pour analyser les retours clients (feedbacks) en utilisant l'intelligence artificielle.
 
