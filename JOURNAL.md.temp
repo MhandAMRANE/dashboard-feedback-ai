@@ -84,33 +84,30 @@ La visualisation de données est valorisante, mais l'agrégation en amont (le ne
 
 ---
 
-## Session 7 — Exports CSV/PDF et Professionnalisation
+## Session 7 — Exportation PDF et Professionnalisation
 ### Ce que je voulais faire
-L'objectif était de permettre l'exportation des résultats. J'avais déjà une exportation CSV mais elle était cassée suite à une modification. Je voulais la réparer et ajouter l'exportation PDF pour un rendu plus pro.
+Je voulais que l'application puisse être utilisée dans un vrai contexte pro. Un manager veut un rapport PDF, pas juste un écran web.
 
 ### Comment j’ai travaillé avec l’IA
-J'ai dû demander à l'IA de restaurer la route `/export` que j'avais écrasée par erreur : « Restaure la fonction d'export CSV d'origine car je l'ai perdue. » Puis j'ai demandé : « Ajoute maintenant l'export PDF avec reportlab. »
-J'ai appris à peupler un document PDF dynamiquement à partir d'une liste de dictionnaires.
+Prompt : « Utilise ReportLab pour générer un PDF propre avec un tableau et les stats globales. »
+J'ai appris à manipuler les "Flowables" de ReportLab. J'ai aussi poussé mes modifications sur GitHub pour la première fois proprement avec des commits clairs.
 
 ### Ce qui a bloqué ou changé
-La mise en page du PDF a été délicate. Les colonnes étaient trop larges. J'ai dû apprendre à utiliser `TableStyle` pour ajuster la taille des cellules et les polices. Autre blocage : un conflit de port (5000) avec Docker, que j'ai résolu en identifiant et tuant le processus Flask bloqué.
-
-### Ce que j’en retiens
-Restaurer du code perdu est frustrant, j'ai compris pourquoi Git est indispensable. GitHub m'a sauvé la mise pour synchroniser mes versions.
+Conflit de ports avec Docker (port 5000 déjà utilisé). J'ai appris que sur Windows, certains processus Flask restent parfois en fond. J'ai dû tuer les tâches pour pouvoir relancer proprement.
 
 ---
 
-## Session 8 — Expérimentation et Pivot Final (Les Alertes)
+## Session 8 — Expérimentation et Pivot (Les Alertes)
 ### Ce que je voulais faire
-Je voulais aller plus loin avec un système d'alerte automatique (notification si trop de feedbacks négatifs). 
+Je voulais ajouter un système d'alerte : "Attention, trop de retours négatifs !". C'était une demande de ma part pour rendre le projet encore plus "intelligent".
 
 ### Comment j’ai travaillé avec l’IA
-J'ai implémenté un système avec un seuil dans le fichier `.env`. C'était intéressant techniquement de découpler la configuration du code source.
+J'ai créé un seuil configurable dans le `.env`. J'ai trouvé ça super d'avoir une config externe au code.
 
-### Ce qui a bloqué ou changé (Décision de retrait)
-Finalement, j'ai décidé de **supprimer cette fonctionnalité**. Après réflexion, je trouvais que cela alourdissait l'application sans apporter de réelle valeur ajoutée immédiate pour l'utilisateur.
-**Action radicale :** J'ai supprimé tout le code lié aux alertes (route, template, service Python).
-Ce n'est pas un échec, c'est un choix conscient de garder un produit simple et efficace.
+### Ce qui a bloqué ou changé (Le virage)
+Après l'avoir fait, je me suis rendu compte que ça polluait l'expérience utilisateur et que je ne voulais pas de cette complexité inutile pour le moment. **J'ai décidé de tout supprimer.**
+C'était un moment de doute : "Est-ce que j'ai perdu mon temps ?".
+Finalement, non. Supprimer du code est aussi important que d'en écrire. J'ai appris à faire machine arrière proprement avec Git.
 
 ### Ce que j’en retiens
-Savoir retirer une fonctionnalité est une preuve de maturité. J'ai appris à "nettoyer" mon repo Git pour qu'il soit propre et prêt à être rendu sans "code mort".
+Il vaut mieux une application qui fait peu de choses mais les fait parfaitement, plutôt qu'un outil avec trop de gadgets. La simplicité est une décision de design consciente.

@@ -1,39 +1,85 @@
-# Dashboard Feedback AI (Sessions 1 & 2)
+# 🚀 Feedback AI - Dashboard Analytique Intelligent
 
-Ce projet est un tableau de bord analytique conçu pour importer, visualiser et bientôt analyser des feedbacks clients via une intelligence artificielle.
+**Feedback AI** est une application web moderne conçue pour transformer les retours clients bruts (CSV) en insights actionnables grâce à l'intelligence artificielle. 
 
-##  État Actuel (Sessions 1 & 2)
+L'outil permet d'importer des feedbacks, de les stocker de manière persistante, de les analyser (sentiment, thématiques) via des LLM, et d'exporter des rapports professionnels.
 
-Actuellement, les fondations du projet et l'ingestion de données sont terminées :
+---
 
-- **Squelette Flask** : Structure complète de l'application avec routage et navigation professionnelle.
-- **Design System** : Interface moderne "Slate & Indigo" utilisant la police Inter, des cartes d'information et un système de badges.
-- **Importation CSV (Pandas)** : 
-  - Système de dépôt de fichier `.csv`.
-  - Aperçu instantané des 5 premières lignes via Pandas.
-  - Statistiques rapides sur le contenu du fichier (nom, nombre de lignes/colonnes).
+## ✨ Fonctionnalités Clés
 
-##  Installation & Lancement
+- **📥 Import Intelligent** : Dépôt de fichiers CSV avec aperçu dynamique via Pandas.
+- **🗄️ Stockage Persistant** : Base de données SQLite locale pour conserver l'historique des analyses.
+- **🤖 Analyse IA (LLM)** : Détection automatique des sentiments (Positif, Neutre, Négatif) et des thématiques clés (Service, Prix, UX, Bug, etc.) via OpenRouter.
+- **📊 Dashboard Interactif** : 
+    - Cartes de scores en temps réel.
+    - Graphiques de répartition (Chart.js).
+    - Filtres multicritères (Sentiment, Thème, Date).
+- **📄 Exportation Multi-format** : 
+    - Exportation des données brutes en **CSV**.
+    - Génération de rapports d'analyse professionnels en **PDF** (ReportLab).
 
-1. **Prérequis** : Assurez-vous d'avoir Python 3.9+ d'installé.
+---
+
+## 🛠️ Stack Technique
+
+- **Backend** : Python 3.9+ / Flask
+- **Data** : Pandas (Traitement CSV) / SQLite (Base de données locale)
+- **IA** : OpenRouter (Accès unifié aux modèles comme Gemini, GPT-4, Llama)
+- **Frontend** : HTML5 / CSS3 (Vanilla) / Chart.js (Visualisation)
+- **Reporting** : ReportLab (Génération PDF)
+
+---
+
+## 🚀 Installation et Lancement
+
+1. **Cloner le projet** :
+   ```bash
+   git clone https://github.com/MhandAMRANE/dashboard-feedback-ai.git
+   cd dashboard-feedback-ai
+   ```
+
 2. **Installer les dépendances** :
    ```bash
    pip install -r requirements.txt
    ```
-3. **Configurer l'environnement** :
-   - Copiez le fichier d'exemple : `cp .env.example .env` (ou renommez-le manuellement).
-   - Pour les Sessions 1 & 2, les valeurs par défaut suffisent.
-4. **Lancer le serveur** :
+
+3. **Configurer les variables d'environnement** :
+   - Créez un fichier `.env` à la racine :
+     ```text
+     OPENROUTER_API_KEY=votre_clé_ici
+     OPENROUTER_MODEL=deepseek/deepseek-chat
+     DATABASE_URL=sqlite:///database/feedbacks.db
+     ```
+
+4. **Lancer l'application** :
    ```bash
    python app.py
    ```
-5. **Accès** : Ouvrez votre navigateur sur `http://127.0.0.1:5000`.
-
-##  Utilisation
-
-- Rendez-vous dans la section **"Importer"**.
-- Sélectionnez le fichier d'exemple `data/sample_feedbacks.csv`.
-- Cliquez sur **"Lancer l'importation"** pour voir l'aperçu dynamique de vos données.
+   Accédez à l'interface sur : `http://127.0.0.1:5000`
 
 ---
-*Note : Les fonctionnalités de stockage SQLite et d'analyse IA (DeepSeek) font partie des sessions suivantes.( session 3,4,5,6)*
+
+## 📂 Structure du Projet
+
+```text
+dashboard-feedback-ai/
+├── app.py              # Point d'entrée Flask et routes
+├── src/                # Logique métier
+│   ├── llm.py          # Appels API OpenRouter
+│   ├── storage.py      # Gestion SQLite
+│   ├── analytics.py    # Calculs et statistiques
+│   └── utils.py        # Fonctions utilitaires
+├── templates/          # Pages HTML (Jinja2)
+├── static/             # Styles CSS et Scripts JS
+├── data/               # Dossier de stockage des CSV importés
+└── database/           # Fichier feedbacks.db (SQLite)
+```
+
+---
+
+## 📝 Journal de Développement
+Pour plus de détails sur les choix de conception, les pivots techniques (comme l'abandon du système d'alertes) et l'évolution du projet, consultez le fichier [JOURNAL.md](./JOURNAL.md).
+
+---
+*Projet réalisé dans le cadre du module [Nom du module] - 2026*
