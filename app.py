@@ -229,6 +229,13 @@ def analyze_feedbacks():
     theme_stats = compute_theme_stats(feedbacks)
     available_themes = get_available_themes(feedbacks)
 
+    # Ajout pour l'évolution temporelle des sentiments
+    from src.analytics import compute_weekly_sentiment, detect_negative_peak
+    labels, data_positifs, data_neutres, data_negatifs = compute_weekly_sentiment(feedbacks)
+
+    # Détection d'un pic négatif sur le thème 'livraison' (>5)
+    negative_peak_weeks = detect_negative_peak(feedbacks, theme="livraison", threshold=5)
+
     return render_template(
         "dashboard.html",
         feedbacks=feedbacks,
@@ -240,6 +247,11 @@ def analyze_feedbacks():
         current_sentiment="",
         current_theme="",
         current_date="",
+        labels=labels,
+        data_positifs=data_positifs,
+        data_neutres=data_neutres,
+        data_negatifs=data_negatifs,
+        negative_peak_weeks=negative_peak_weeks,
     )
 
 
@@ -268,6 +280,13 @@ def judge_feedbacks():
     theme_stats = compute_theme_stats(feedbacks)
     available_themes = get_available_themes(feedbacks)
 
+    # Ajout pour l'évolution temporelle des sentiments
+    from src.analytics import compute_weekly_sentiment, detect_negative_peak
+    labels, data_positifs, data_neutres, data_negatifs = compute_weekly_sentiment(feedbacks)
+
+    # Détection d'un pic négatif sur le thème 'livraison' (>5)
+    negative_peak_weeks = detect_negative_peak(feedbacks, theme="livraison", threshold=5)
+
     return render_template(
         "dashboard.html",
         feedbacks=feedbacks,
@@ -279,6 +298,11 @@ def judge_feedbacks():
         current_sentiment="",
         current_theme="",
         current_date="",
+        labels=labels,
+        data_positifs=data_positifs,
+        data_neutres=data_neutres,
+        data_negatifs=data_negatifs,
+        negative_peak_weeks=negative_peak_weeks,
     )
 
 
@@ -301,6 +325,13 @@ def dashboard():
     theme_stats = compute_theme_stats(filtered_feedbacks)
     available_themes = get_available_themes(feedbacks)
 
+    # Ajout pour l'évolution temporelle des sentiments
+    from src.analytics import compute_weekly_sentiment, detect_negative_peak
+    labels, data_positifs, data_neutres, data_negatifs = compute_weekly_sentiment(filtered_feedbacks)
+
+    # Détection d'un pic négatif sur le thème 'livraison' (>5)
+    negative_peak_weeks = detect_negative_peak(filtered_feedbacks, theme="livraison", threshold=5)
+
     return render_template(
         "dashboard.html",
         feedbacks=filtered_feedbacks,
@@ -312,6 +343,11 @@ def dashboard():
         current_sentiment=sentiment_filter,
         current_theme=theme_filter,
         current_date=date_filter,
+        labels=labels,
+        data_positifs=data_positifs,
+        data_neutres=data_neutres,
+        data_negatifs=data_negatifs,
+        negative_peak_weeks=negative_peak_weeks,
     )
 
 
@@ -332,18 +368,19 @@ def export_feedbacks():
     # Préparer le CSV en mémoire
     output = io.StringIO()
     writer = csv.DictWriter(output, fieldnames=[
-        "id", "feedback_date", "text", "sentiment", "themes", "confidence", "created_at"
+        "id", "feedback_date", "text", "sentiment", "themes", "confidence", "created_at", "source_file"
     ])
     writer.writeheader()
     for fb in filtered_feedbacks:
         writer.writerow({
             "id": fb["id"],
-            "feedback_date": fb["feedback_date"],
+            "feedback_date": fb["feedback_date_raw"],
             "text": fb["text"],
             "sentiment": fb["sentiment"],
             "themes": fb["themes"],
             "confidence": fb["confidence"],
             "created_at": fb["created_at"],
+            "source_file": fb.get("source_file", "")
         })
     output.seek(0)
     return send_file(
@@ -416,9 +453,10 @@ def export_pdf():
 
     for fb in filtered_feedbacks:
         p.setFont("Helvetica-Bold", 9)
-        date_str = fb['feedback_date'] or "N/A"
+        date_str = fb['feedback_date_raw'] or "N/A"
         sentiment_str = (fb['sentiment'] or "N/A").upper()
-        p.drawString(50, y, f"[{date_str}] - {sentiment_str}")
+        file_str = fb.get('source_file', '')
+        p.drawString(50, y, f"[{date_str}] - {sentiment_str} - Fichier: {file_str}")
         y -= 12
         
         p.setFont("Helvetica", 9)

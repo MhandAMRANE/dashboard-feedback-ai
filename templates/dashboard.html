@@ -1,3 +1,10 @@
+{% if negative_peak_weeks and negative_peak_weeks|length > 0 %}
+<div class="alert danger" style="margin-bottom: 2rem; padding: 1rem; background: #fee2e2; color: #b91c1c; border-radius: var(--radius-sm); border: 1px solid #fca5a5;">
+    <strong>⚠️ Alerte :</strong> Pic de feedbacks négatifs détecté sur le thème <b>livraison</b> pour la/les semaine(s) :
+    <span style="font-family: monospace;">{{ negative_peak_weeks|join(', ') }}</span>
+    (plus de 5 feedbacks négatifs)
+</div>
+{% endif %}
 {% extends "base.html" %}
 
 {% block title %}Dashboard Analytics{% endblock %}
@@ -13,14 +20,14 @@
         margin-bottom: 2rem;
         gap: 2rem;
     }
-    
+
     .charts-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 2rem;
         margin-bottom: 2rem;
     }
-    
+
     @media (max-width: 992px) {
         .charts-grid {
             grid-template-columns: 1fr;
@@ -53,20 +60,27 @@
         <h1 style="margin-bottom: 0.5rem;">Dashboard Analytique</h1>
         <p class="text-muted">Exploitez l'IA pour comprendre vos retours clients en profondeur.</p>
     </div>
-    
+
     <div class="header-actions">
         <form method="POST" action="{{ url_for('analyze_feedbacks') }}" style="display: inline-block;">
             <button type="submit" class="btn">
-                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right: 8px;">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    style="margin-right: 8px;">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                 </svg>
                 Lancer l'analyse IA
             </button>
         </form>
-        <form method="POST" action="{{ url_for('judge_feedbacks') }}" style="display: inline-block; margin-left: 0.5rem;">
-            <button type="submit" class="btn btn-secondary" style="background: var(--primary-soft); color: var(--primary); border: 1px solid var(--primary-soft);">
-                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right: 8px;">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+        <form method="POST" action="{{ url_for('judge_feedbacks') }}"
+            style="display: inline-block; margin-left: 0.5rem;">
+            <button type="submit" class="btn btn-secondary"
+                style="background: var(--primary-soft); color: var(--primary); border: 1px solid var(--primary-soft);">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    style="margin-right: 8px;">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
+                    </path>
                 </svg>
                 Audit Qualité (LLM Judge)
             </button>
@@ -75,13 +89,15 @@
 </div>
 
 {% if judged_count is not none %}
-<div class="alert success" style="margin-bottom: 2rem; padding: 1rem; background: #e0f2fe; color: #0369a1; border-radius: var(--radius-sm); border: 1px solid #7dd3fc;">
+<div class="alert success"
+    style="margin-bottom: 2rem; padding: 1rem; background: #e0f2fe; color: #0369a1; border-radius: var(--radius-sm); border: 1px solid #7dd3fc;">
     <strong>Audit Terminé !</strong> {{ judged_count }} analyse(s) auditée(s) par le juge IA.
 </div>
 {% endif %}
 
 {% if analyzed_count is not none %}
-<div class="alert success" style="margin-bottom: 2rem; padding: 1rem; background: var(--success-bg); color: var(--success-text); border-radius: var(--radius-sm); border: 1px solid var(--success);">
+<div class="alert success"
+    style="margin-bottom: 2rem; padding: 1rem; background: var(--success-bg); color: var(--success-text); border-radius: var(--radius-sm); border: 1px solid var(--success);">
     <strong>Succès !</strong> {{ analyzed_count }} feedback(s) analysé(s) avec succès.
 </div>
 {% endif %}
@@ -116,8 +132,80 @@
     </div>
 </div>
 
+<div class="chart-container" style="margin-bottom: 2rem; max-width: 900px;">
+    <h3 style="margin-bottom: 1rem; font-size: 1rem;">Évolution Temporelle des Sentiments</h3>
+    <canvas id="sentimentTimeChart"></canvas>
+</div>
+
+<script>
+if (document.getElementById('sentimentTimeChart')) {
+    const ctx = document.getElementById('sentimentTimeChart').getContext('2d');
+    const sentimentTimeChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ labels|tojson }},
+            datasets: [
+                {
+                    label: 'Positifs',
+                    data: {{ data_positifs|tojson }},
+                    borderColor: 'green',
+                    backgroundColor: 'rgba(34,197,94,0.1)',
+                    fill: false,
+                    tension: 0.2
+                },
+                {
+                    label: 'Neutres',
+                    data: {{ data_neutres|tojson }},
+                    borderColor: 'orange',
+                    backgroundColor: 'rgba(251,191,36,0.1)',
+                    fill: false,
+                    tension: 0.2
+                },
+                {
+                    label: 'Négatifs',
+                    data: {{ data_negatifs|tojson }},
+                    borderColor: 'red',
+                    backgroundColor: 'rgba(239,68,68,0.1)',
+                    fill: false,
+                    tension: 0.2
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Évolution des Sentiments par Semaine'
+                },
+                legend: {
+                    display: true,
+                    position: 'top'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Nombre de feedbacks'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Semaine'
+                    }
+                }
+            }
+        }
+    });
+}
+</script>
+
 <section class="card">
-    <div class="flex-between" style="border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+    <div class="flex-between"
+        style="border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 1.5rem;">
         <h2 style="margin: 0;">Filtres de Recherche</h2>
     </div>
     <form method="GET" action="{{ url_for('dashboard') }}" class="filters-form">
@@ -149,17 +237,32 @@
         <div class="filter-actions">
             <button type="submit" class="btn">Appliquer</button>
             <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Reset</a>
-            <a href="{{ url_for('export_feedbacks') }}?sentiment={{ current_sentiment }}&theme={{ current_theme }}&date={{ current_date }}" class="btn btn-secondary" style="margin-left: 1rem;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="margin-right: 6px; vertical-align: middle;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <a href="{{ url_for('export_feedbacks') }}?sentiment={{ current_sentiment }}&theme={{ current_theme }}&date={{ current_date }}"
+                class="btn btn-secondary" style="margin-left: 1rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"
+                    style="margin-right: 6px; vertical-align: middle;">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
                 Exporter en CSV
             </a>
-            <a href="{{ url_for('export_pdf') }}?sentiment={{ current_sentiment }}&theme={{ current_theme }}&date={{ current_date }}" class="btn btn-success" style="margin-left: 0.5rem;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="margin-right: 6px; vertical-align: middle;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <a href="{{ url_for('export_pdf') }}?sentiment={{ current_sentiment }}&theme={{ current_theme }}&date={{ current_date }}"
+                class="btn btn-success" style="margin-left: 0.5rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"
+                    style="margin-right: 6px; vertical-align: middle;">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
                 Exporter en PDF
             </a>
         </div>
     </form>
 </section>
+
 
 <section class="card" style="padding: 1.5rem;">
     <h2 style="margin-bottom: 1.5rem;">Historique Détaillé</h2>
@@ -185,46 +288,62 @@
                     <td style="font-weight: 500;">{{ feedback.text }}</td>
                     <td>
                         {% if feedback.sentiment == 'positive' %}
-                            <span class="sentiment-badge" style="background: var(--success-bg); color: var(--success-text);">Positif</span>
+                        <span class="sentiment-badge"
+                            style="background: var(--success-bg); color: var(--success-text);">Positif</span>
                         {% elif feedback.sentiment == 'negative' %}
-                            <span class="sentiment-badge" style="background: var(--danger-bg); color: var(--danger-text);">Négatif</span>
+                        <span class="sentiment-badge"
+                            style="background: var(--danger-bg); color: var(--danger-text);">Négatif</span>
                         {% elif feedback.sentiment == 'neutral' %}
-                            <span class="sentiment-badge" style="background: var(--warning-bg); color: var(--warning-text);">Neutre</span>
+                        <span class="sentiment-badge"
+                            style="background: var(--warning-bg); color: var(--warning-text);">Neutre</span>
                         {% else %}
-                            <span class="sentiment-badge" style="background: #f1f5f9; color: var(--secondary);">N/A</span>
+                        <span class="sentiment-badge" style="background: #f1f5f9; color: var(--secondary);">N/A</span>
                         {% endif %}
                     </td>
                     <td>
                         {% if feedback.themes %}
-                            {% for theme in feedback.themes.split(',') %}
-                                <span style="display: inline-block; background: var(--primary-soft); color: var(--primary); padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; margin: 2px;">{{ theme.strip() }}</span>
-                            {% endfor %}
+                        {% for theme in feedback.themes.split(',') %}
+                        <span
+                            style="display: inline-block; background: var(--primary-soft); color: var(--primary); padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; margin: 2px;">{{
+                            theme.strip() }}</span>
+                        {% endfor %}
                         {% else %}
-                            -
+                        -
                         {% endif %}
                     </td>
                     <td style="font-family: monospace; font-weight: bold;">
                         {% if feedback.confidence %}
-                            {{ (feedback.confidence * 100)|round|int }}%
+                        {{ (feedback.confidence * 100)|round|int }}%
                         {% else %}
-                            -
+                        -
                         {% endif %}
                     </td>
                     <td>
                         {% if feedback.judge_sentiment %}
-                            {% if feedback.judge_sentiment == feedback.sentiment %}
-                                <span class="sentiment-badge" style="background: #ecfdf5; color: #065f46; display: flex; align-items: center; gap: 4px; font-size: 0.65rem;" title="{{ feedback.judge_explanation }}">
-                                    <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                                    Confirmé
-                                </span>
-                            {% else %}
-                                <span class="sentiment-badge" style="background: #fff1f2; color: #991b1b; display: flex; align-items: center; gap: 4px; font-size: 0.65rem;" title="{{ feedback.judge_explanation }}">
-                                    <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                                    Désaccord
-                                </span>
-                            {% endif %}
+                        {% if feedback.judge_sentiment == feedback.sentiment %}
+                        <span class="sentiment-badge"
+                            style="background: #ecfdf5; color: #065f46; display: flex; align-items: center; gap: 4px; font-size: 0.65rem;"
+                            title="{{ feedback.judge_explanation }}">
+                            <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                    d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Confirmé
+                        </span>
                         {% else %}
-                            <span class="text-muted" style="font-size: 0.7rem;">En attente</span>
+                        <span class="sentiment-badge"
+                            style="background: #fff1f2; color: #991b1b; display: flex; align-items: center; gap: 4px; font-size: 0.65rem;"
+                            title="{{ feedback.judge_explanation }}">
+                            <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                                </path>
+                            </svg>
+                            Désaccord
+                        </span>
+                        {% endif %}
+                        {% else %}
+                        <span class="text-muted" style="font-size: 0.7rem;">En attente</span>
                         {% endif %}
                     </td>
                     <td class="text-muted" style="font-size: 0.85rem; font-style: italic;">
@@ -251,34 +370,34 @@
             labels: ['Positifs', 'Neutres', 'Négatifs'],
             datasets: [{
                 data: [
-                    {{ sentiment_stats.positive | default(0) }}, 
-                    {{ sentiment_stats.neutral | default(0) }}, 
+                    {{ sentiment_stats.positive | default(0) }},
+            {{ sentiment_stats.neutral | default(0) }}, 
                     {{ sentiment_stats.negative | default(0) }}
                 ],
-                backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
-                borderWidth: 0,
-                hoverOffset: 10
+        backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+        borderWidth: 0,
+        hoverOffset: 10
             }]
         },
         options: {
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { position: 'bottom' }
-            },
-            cutout: '70%'
-        }
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { position: 'bottom' }
+        },
+        cutout: '70%'
+    }
     });
 
     // Theme Chart
     const ctxTheme = document.getElementById('themeChart').getContext('2d');
     const themeLabels = [];
     const themeData = [];
-    
+
     {% for theme, count in theme_stats %}
     themeLabels.push("{{ theme }}");
     themeData.push({{ count }});
     {% endfor %}
-    
+
     new Chart(ctxTheme, {
         type: 'bar',
         data: {

@@ -1,0 +1,64 @@
+import pandas as pd
+from flask import render_template
+
+def compute_weekly_sentiment(feedbacks):
+    df = pd.DataFrame(feedbacks)
+    df['date'] = pd.to_datetime(df['feedback_date_raw'])
+    df['week'] = df['date'].dt.to_period('W').astype(str)
+    # Compter les sentiments par semaine
+    weekly_counts = df.groupby('week')['sentiment'].value_counts().unstack(fill_value=0).reset_index()
+    labels = weekly_counts['week'].tolist()
+    data_positifs = weekly_counts.get('positif', pd.Series([0]*len(labels))).tolist()
+    data_neutres = weekly_counts.get('neutre', pd.Series([0]*len(labels))).tolist()
+    data_negatifs = weekly_counts.get('negatif', pd.Series([0]*len(labels))).tolist()
+    return labels, data_positifs, data_neutres, data_negatifs
+
+# Dans ta route dashboard (extrait à ajouter AVANT le render_template)
+# feedbacks = fetch_feedback_dicts() déjà présent
+labels, data_positifs, data_neutres, data_negatifs = compute_weekly_sentiment(feedbacks)
+
+# Dans le render_template ajoute :
+# labels=labels, data_positifs=data_positifs, data_neutres=data_neutres, data_negatifs=data_negatifs
+
+# Dans dashboard.html, ajoute ce bloc où tu veux le graphique :
+
+# <canvas id="sentimentTimeChart"></canvas>
+# <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+# <script>
+# const ctx = document.getElementById('sentimentTimeChart').getContext('2d');
+# const sentimentTimeChart = new Chart(ctx, {
+#     type: 'line',
+#     data: {
+#         labels: {{ labels|tojson }},
+#         datasets: [
+#             {
+#                 label: 'Positifs',
+#                 data: {{ data_positifs|tojson }},
+#                 borderColor: 'green',
+#                 fill: false
+#             },
+#             {
+#                 label: 'Neutres',
+#                 data: {{ data_neutres|tojson }},
+#                 borderColor: 'orange',
+#                 fill: false
+#             },
+#             {
+#                 label: 'Négatifs',
+#                 data: {{ data_negatifs|tojson }},
+#                 borderColor: 'red',
+#                 fill: false
+#             }
+#         ]
+#     },
+#     options: {
+#         responsive: true,
+#         plugins: {
+#             title: {
+#                 display: true,
+#                 text: 'Évolution des Sentiments par Semaine'
+#             }
+#         }
+#     }
+# });
+# </script>

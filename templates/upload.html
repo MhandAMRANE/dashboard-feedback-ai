@@ -132,29 +132,6 @@
         {% endif %}
     </div>
 
-    <!-- Danger Zone : Reset Database -->
-    <div style="margin-top: 4rem; border-top: 1px solid var(--danger); padding-top: 2rem; background: #fff0f0; padding: 2rem; border-radius: 8px;">
-        <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--danger);">Zone de Danger</h2>
-        <p style="color: var(--danger-text); margin-bottom: 1.5rem;">Cette action va supprimer tous les feedbacks de la base de données et effacer tous les fichiers CSV importés. Cette action est irréversible.</p>
-        
-        <form action="{{ url_for('reset_database') }}" method="POST" onsubmit="return confirm('ATTENTION : Êtes-vous sûr de vouloir vider complètement la base de données et supprimer tous les fichiers importés ? Cette action est définitive.');">
-            <button type="submit" class="btn" style="padding: 0.8rem 1.5rem; font-size: 1rem; font-weight: bold; background: var(--danger); color: white; border: none; width: 100%;">
-                Vider la base de données
-            </button>
-        </form>
-    </div>
-
-    <!-- Danger Zone : Reset Database -->
-    <div style="margin-top: 4rem; border-top: 1px solid var(--danger); padding-top: 2rem; background: #fff0f0; padding: 2rem; border-radius: 8px;">
-        <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--danger);">Zone de Danger</h2>
-        <p style="color: var(--danger-text); margin-bottom: 1.5rem;">Cette action va supprimer tous les feedbacks de la base de données et effacer tous les fichiers CSV importés. Cette action est irréversible.</p>
-        
-        <form action="{{ url_for('reset_database') }}" method="POST" onsubmit="return confirm('ATTENTION : Êtes-vous sûr de vouloir vider complètement la base de données et supprimer tous les fichiers importés ? Cette action est définitive.');">
-            <button type="submit" class="btn" style="padding: 0.8rem 1.5rem; font-size: 1rem; font-weight: bold; background: var(--danger); color: white; border: none; width: 100%;">
-                Vider la base de données
-            </button>
-        </form>
-    </div>
 </section>
 
 {% endblock %}

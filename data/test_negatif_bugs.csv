@@ -1,0 +1,11 @@
+text,date
+"L'application plante régulièrement quand on charge plus de 500 feedbacks.",2024-02-10
+"Le bouton d'analyse ne répond pas parfois, il faut recharger la page.",2024-02-12
+"L'export CSV ne fonctionne pas sur Firefox, uniquement sur Chrome.",2024-02-14
+"Temps de réponse de l'IA trop long, plus de 30 secondes par feedback.",2024-02-16
+"Le filtre par date ne prend pas en compte le bon format, très problématique.",2024-02-18
+"Impossible d'importer des fichiers avec des accents dans le nom.",2024-02-20
+"Les graphiques ne s'affichent pas sur mobile, interface non responsive.",2024-02-22
+"On perd tous nos filtres quand on rafraîchit la page, irritant.",2024-02-25
+"L'analyse IA fait des erreurs sur les textes courts de moins de 10 mots.",2024-02-28
+"Le dashboard est lent à charger quand la base dépasse 200 entrées.",2024-03-01

@@ -5,7 +5,7 @@
 - ** Analyse IA (LLM)** : Utilise des modèles de pointe (DeepSeek, GPT-4, etc.) pour qualifier chaque feedback :
   - **Sentiment** : Positif, Neutre ou Négatif.
   - **Thématiques** : Identification automatique parmi 9 catégories (Support, Qualité, Prix, UX, etc.).
-- ⚖️ **Audit Qualité (LLM Judge)** : Un second modèle (Gemini 2.0 Flash) audite automatiquement les analyses pour garantir une fiabilité maximale.
+- **Audit Qualité (LLM Judge)** : Un second modèle (Gemini 2.0 Flash) audite automatiquement les analyses pour garantir une fiabilité maximale.
 - **Dashboard Interactif** : Visualisez les tendances globales via des graphiques dynamiques (Chart.js) et filtrez les données par sentiment, thème ou date.
 - **Rapports & Exports** : Exportez vos analyses au format **CSV** pour un traitement externe ou générez un rapport **PDF** professionnel.
 - **Stockage Local Sécurisé** : Vos données sont conservées localement dans une base de données SQLite performante.
@@ -31,38 +31,35 @@ git clone https://github.com/MhandAMRANE/dashboard-feedback-ai.git
 cd dashboard-feedback-ai
 ```
 
-### 2. Configurer l'environnement virtuel (Recommandé)
+### 2. Créer et activer l'environnement virtuel
 ```bash
 python -m venv .venv
-# Sur Windows :
-.\.venv\Scripts\activate
-# Sur macOS/Linux :
-source .venv/bin/activate
 ```
+- **Windows** : `.\.venv\Scripts\activate`
+- **macOS/Linux** : `source .venv/bin/activate`
 
 ### 3. Installer les dépendances
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Configuration des variables d'environnement
-Créez un fichier `.env` à la racine (ou copiez `.env.example`) :
+### 4. Configurer la clé API (OBLIGATOIRE)
+
+
+Créez un fichier `.env` à la racine du projet :
 ```env
-OPENROUTER_API_KEY=votre_cle_api_ici
-OPENROUTER_MODEL=deepseek/deepseek-chat
-DATABASE_URL=sqlite:///database/feedbacks.db
-SECRET_KEY=votre_cle_secrete_flask
+OPENROUTER_API_KEY=sk-or-xxxxxxxxxxxxxxxxxxxx
 ```
+Obtenez votre clé gratuite sur : **[https://openrouter.ai]**
 
 ### 5. Lancer l'application
 ```bash
 python app.py
 ```
-Accédez à l'interface sur : **[http://127.0.0.1:5000]**
+Accédez à l'interface sur : **[http://127.0.0.1:5000](http://127.0.0.1:5000)**
 
----
 
-## Aperçu du Dashboard
+
 
 ---
 
